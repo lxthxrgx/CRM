@@ -1,0 +1,38 @@
+﻿.signin {
+    width: 500px;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid #ccc;
+}
+
+.body {
+    background-color: #eae7dc;
+}
+
+.form-group {
+    margin-bottom: 20px; /* Отступ между элементами формы */
+}
+
+.form-control {
+    width: 100%; /* Ширина инпутов */
+}
+
+
+footer {
+    display: none; /* Скрыть footer */
+}
+
+container {
+    display: none; /* Скрыть footer */
+}
+.btn.btn-primary.sign-in {
+    width: 100%; /* Ширина кнопки */
+    background-color: darkolivegreen;
+}

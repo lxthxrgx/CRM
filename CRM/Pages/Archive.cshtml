@@ -1,0 +1,320 @@
+﻿@page
+@model SRMAgreement.Pages.ArchiveModel
+@{
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = User.Identity.Name;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isRW = User.IsInRole("RW");
+    var isUser = User.IsInRole("User");
+    var isQW = User.IsInRole("QW");
+    var isBUH = User.IsInRole("BUH");
+}
+<link rel="stylesheet" href="~/css/Conterparty.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Archive.css" asp-append-version="true" />
+
+<form method="post">
+    <input class="search" asp-for="SearchQuery" />
+    <button type="submit" name="action" value="Search" class="btn btn-search">Поиск</button>
+</form>
+
+<nav class="navbar" id="navbar1" data-target="collapse1">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-controls="collapse1" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            <span class="navbar-brand mb-0 h1 me-auto">Архів Суборенди</span>
+        </button>
+    </div>
+</nav>
+
+<div class="collapse" id="collapse1">
+    <div class="data">
+        <table id="counterpartyTable1" class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th><div class="resizable-column">Номер</div></th>
+                    <th><div class="resizable-column">Найменування</div></th>
+                    <th><div class="resizable-column">Адреса</div></th>
+                    <th><div class="resizable-column">Договір оренди</div></th>
+                    <th><div class="resizable-column">Дата укладання</div></th>
+                    <th><div class="resizable-column">Сума</div></th>
+                    <th><div class="resizable-column">Акт дата</div></th>
+                    <th><div class="resizable-column">Стан</div></th>
+                    <th><div class="resizable-column">Примітка</div></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.AD4.Count; i++)
+                {
+                    <tr class="@(Model.AD4[i].Id == 0 ? "bg-d" : "")">
+                        <td>
+                            <textarea readonly id="NumberGroup-@i" class="form-control auto-resize" name="AD4[@i].NumberGroup">@Model.AD4[i].NumberGroup</textarea>
+                        </td>
+                        <td>
+                            <textarea readonly id="NameGroup-@i" class="form-control auto-resize" name="AD4[@i].NameGroup">@Model.AD4[i].NameGroup</textarea>
+                        </td>
+                        <td>
+                            <textarea readonly id="address-@i" class="form-control auto-resize" name="AD4[@i].address">@Model.AD4[i].address</textarea>
+                        </td>
+                        <td>
+                            <textarea id="DogovirSuborendu-@i" class="form-control auto-resize" name="AD4[@i].DogovirSuborendu">@Model.AD4[i].DogovirSuborendu</textarea>
+                        </td>
+                        <td>
+                            <textarea id="DateTime-@i" class="form-control auto-resize" name="AD4[@i].DateTime">@((Model.AD4[i].DateTime != DateTime.MinValue) ? Model.AD4[i].DateTime.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td>
+                            <textarea id="Suma-@i" class="form-control auto-resize" name="AD4[@i].Suma">@Model.AD4[i].Suma</textarea>
+                        </td>
+                        <td>
+                            <textarea id="AktDate-@i" class="form-control auto-resize" name="D4[@i].AktDate">@((Model.AD4[i].AktDate != DateTime.MinValue) ? Model.AD4[i].AktDate.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary add-to-main-db" data-id="@Model.AD4[i].Id" @(isQW || isUser || isBUH ? "disabled" : "")>Створити копію</button>
+                        </td>
+                        <input id="Id-@i" type="hidden" name="AD4[@i].Id" value="@Model.AD4[i].Id" />
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<nav class="navbar" id="navbar2" data-target="collapse2">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-controls="collapse2" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            <span class="navbar-brand mb-0 h1 me-auto">Архів Оренди</span>
+        </button>
+    </div>
+</nav>
+
+<div class="collapse" id="collapse2">
+    <div class="data">
+        <!-- Table content for second nav -->
+        <table id="counterpartyTable2" class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th>Номер відділення</th>
+                    <th>Найменування відділення</th>
+                    <th>Адреса</th>
+                    <th>Договір оренди</th>
+                    <th>Дата укладання</th>
+                    <th>Строк дії</th>
+                    <th>Сума</th>
+                    <th>Акт дата</th>
+                    <th>Стан</th>
+                    <th>Примітка</th>
+                    <th>Шаблон</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.AD3.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <textarea readonly id="NumberGroup-@i" class="form-control auto-resize" name="AD3[@i].NumberGroup">@Model.AD3[i].NumberGroup</textarea>
+                        </td>
+                        <td>
+                            <textarea readonly id="NameGroup-@i" class="form-control auto-resize" name="AD3[@i].NameGroup">@Model.AD3[i].NameGroup</textarea>
+                        </td>
+                        <td>
+                            <textarea readonly id="address-@i" class="form-control auto-resize" name="AD3[@i].address">@Model.AD3[i].address</textarea>
+                        </td>
+                        <td><textarea id="DogovirOrendu-@i" class="form-control auto-resize" name="AD3[@i].DogovirOrendu">@Model.AD3[i].DogovirOrendu</textarea></td>
+                        <td>
+                            <textarea id="DateTime-@i" class="form-control auto-resize" name="AD3[@i].DateTime">@((Model.AD3[i].DateTime != DateTime.MinValue) ? Model.AD3[i].DateTime.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td>
+                            <textarea disabled readonly id="StrokDii-@i" class="form-control auto-resize" name="AD3[@i].StrokDii">@((Model.AD3[i].StrokDii != DateTime.MinValue) ? Model.AD3[i].StrokDii.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td><textarea id="Suma-@i" class="form-control auto-resize" name="AD3[@i].Suma">@Model.AD3[i].Suma</textarea></td>
+                        <td>
+                            <textarea id="AktDate-@i" class="form-control auto-resize" name="AD3[@i].AktDate">@((Model.AD3[i].AktDate != DateTime.MinValue) ? Model.AD3[i].AktDate.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td>
+                            <textarea readonly id="Stan-@i" class="form-control auto-resize" name="AD3[@i].Stan">@Model.AD3[i].Stan</textarea>
+                        </td>
+                        <td><textarea id="Prumitka-@i" class="form-control auto-resize" name="AD3[@i].Prumitka">@Model.AD3[i].Prumitka</textarea></td>
+                        <td>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                            data-row-index="@i" data-number-group="@Model.AD3[i].NumberGroup" 
+                            data-name-group="@Model.AD3[i].NameGroup" data-address="@Model.AD3[i].address" 
+                            data-dogovir-orendu="@Model.AD3[i].DogovirOrendu" 
+                            data-date-time="@Model.AD3[i].DateTime.ToString("dd/MM/yyyy")" 
+                            data-strok-dii="@Model.AD3[i].StrokDii.ToString("dd/MM/yyyy")" data-suma="@Model.AD3[i].Suma" 
+                            data-akt-date="@Model.AD3[i].AktDate.ToString("dd/MM/yyyy")" data-stan="@Model.AD3[i].Stan"
+                                    data-prumitka="@Model.AD3[i].Prumitka" data-id="@Model.AD3[i].Id" @(isQW || isUser || isBUH ? "disabled" : "")>
+                                Functions
+                            </button>
+                            <input type="hidden" name="rowIndex" value="@i" />
+                        </td>
+                        <input id="Id-@i" type="hidden" name="AD3[@i].Id" value="@Model.AD3[i].Id" />
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<nav class="navbar" id="navbar3" data-target="collapse3">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-controls="collapse3" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            <span class="navbar-brand mb-0 h1 me-auto">Архів Охорони</span>
+        </button>
+    </div>
+</nav>
+
+<div class="collapse" id="collapse3">
+    <div class="data">
+        <table id="counterpartyTable" class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th>Номер відділення</th>
+                    <th>Адреса</th>
+                    <th>Охоронна копанія</th>
+                    <th>Номер договору</th>
+                    <th>Строк дії</th>
+                    <th>Відповідальна особа</th>
+                    <th>Телефон</th>
+                    <th>Pdf</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.AD5.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                            <textarea readonly id="NumberGroup-@i" class="form-control auto-resize" name="AD5[@i].NumberGroup">@Model.AD5[i].NumberGroup</textarea>
+                            </td>
+                            <td>
+                            <textarea readonly class="form-control auto-resize" id="address-@i" name="AD5[@i].address">@Model.AD5[i].address</textarea>
+                            </td>
+                        <td><textarea class="form-control auto-resize" name="AD5[@i].OhronnaComp">@Model.AD5[i].OhronnaComp</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD5[@i].NumDog">@Model.AD5[i].NumDog</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD5[@i].StrokDii">@((Model.AD3[i].AktDate != DateTime.MinValue) ? Model.AD3[i].AktDate.ToString("dd/MM/yyyy") : string.Empty)</textarea></td>
+                            <td>
+                            <textarea class="form-control" id="dropdownResPerson-@i" name="AD5[@i].ResPerson">@Model.AD5[i].ResPerson</textarea>
+                            </td>
+                            <td>
+                            <textarea class="form-control" id="dropdownResPerson-@i" name="AD5[@i].Phone">@Model.AD5[i].Phone</textarea>
+                            </td>
+                            <td>
+                            @if (!string.IsNullOrEmpty(Model.AD5[i].PathToFile))
+                                {
+                                <textarea disabled readonly class="form-control auto-resize" name="AD5[@i].PathToFile">@Model.AD5[i].PathToFile</textarea>
+                                    @*  <input type="file" class="form-control-file" id="fileUpload-@i" name="D5[@i].FileUpload" /> *@
+                                    <div class="mb-3 form-control-file">
+                                    <input class="form-control" type="file" id="fileUpload-@i" name="AD5[@i].FileUpload">
+                                    </div>
+                                <button type="button" class="uploadButton" data-index="@i" @(isQW || isUser ? "disabled" : "")>Upload</button>
+                                }
+                                else
+                                {
+                                <textarea disabled readonly class="form-control auto-resize" name="AD5[@i].PathToFile">@Model.AD5[i].PathToFile</textarea>
+                                    <div class="mb-3 form-control-file">
+                                    <input class="form-control" type="file" id="fileUpload-@i" name="AD5[@i].FileUpload">
+                                    </div>
+
+                                <button type="button" class="uploadButton" data-index="@i" @(isQW || isUser || isBUH ? "disabled" : "")>Upload</button>
+                                }
+                            </td>
+
+                        <input type="hidden" name="AD5[@i].Id" value="@Model.AD5[i].Id" />
+                        </tr>
+                    }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<nav class="navbar" id="navbar4" data-target="collapse4">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-controls="collapse4" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            <span class="navbar-brand mb-0 h1 me-auto">Архів Тов</span>
+        </button>
+    </div>
+</nav>
+
+<div class="collapse" id="collapse4">
+    <div class="data">
+        <table id="counterpartyTable" class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th><div class="resizable-column">найменування відділення</div></th>
+                    <th><div class="resizable-column">Назва ТОВ</div></th>
+                    <th><div class="resizable-column">Код ЄДРПОУ</div></th>
+                    <th><div class="resizable-column">Місцезнаходження</div></th>
+                    <th><div class="resizable-column">Директор</div></th>
+                    <th><div class="resizable-column">Рахунок + назва банку</div></th>
+                    <th><div class="resizable-column">Відповідальна особа</div></th>
+                    <th><div class="resizable-column">Телефон</div></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.AD6.Count; i++)
+                {
+                    <tr>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].NameGroup">@Model.AD6[i].NameGroup</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].NameTov">@Model.AD6[i].NameTov</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].UnifiedStateRegister">@Model.AD6[i].UnifiedStateRegister</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].address">@Model.AD6[i].address</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].director">@Model.AD6[i].director</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].BanckAccount">@Model.AD6[i].BanckAccount</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].ResPerson">@Model.AD6[i].ResPerson</textarea></td>
+                        <td><textarea class="form-control auto-resize" name="AD6[@i].Phone">@Model.AD6[i].Phone</textarea></td>
+                        <input type="hidden" name="AD6[@i].Id" value="@Model.AD6[i].Id" />
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    $(document).ready(function () {
+
+        // Auto-resize textarea
+        const textareas = document.querySelectorAll('textarea.auto-resize');
+        textareas.forEach(textarea => {
+            const adjustHeight = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 10 + 'px';
+            };
+            adjustHeight(textarea);
+            textarea.addEventListener('input', () => adjustHeight(textarea));
+        });
+
+        // AJAX request
+        $('.add-to-main-db').click(function () {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '/archive/AddToMainDB',
+                type: 'POST',
+                data: { id: id },
+                success: function (response) {
+                    alert('Запись добавлена успешно!');
+                },
+                error: function (xhr, status, error) {
+                    alert('Ошибка при добавлении записи: ' + error);
+                }
+            });
+        });
+
+        // Collapse navbar
+        document.querySelectorAll('.navbar-toggler').forEach(button => {
+            button.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-bs-target').substring(1);
+                document.querySelectorAll('.collapse').forEach(collapse => {
+                    if (collapse.id !== targetId) {
+                        collapse.classList.remove('show');
+                    }
+                });
+            });
+        });
+    });
+</script>

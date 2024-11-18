@@ -1,0 +1,249 @@
+﻿* {
+    scrollbar-width: thin !important;
+    scrollbar-color: #d8c3a5 #eae7dc !important;
+}
+.container {
+    max-width: 100%;
+    padding: 10px;
+}
+
+textarea.form-control {
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    resize: none;
+    min-height: 38px;
+}
+
+body {
+    background-color: #eae7dc;
+}
+
+.table th, .table td {
+    vertical-align: top;
+    padding: 5px;
+}
+
+.table th {
+    background-color: #d8c3a5;
+    font-family: 'Cascadia Mono', sans-serif;
+    text-align: center;
+}
+/*@media screen and (max-width: 1600px) {
+    .table th.resizable-column.NumberGroup,
+    .table td.NumberGroup {
+        max-width: 30px;
+    }
+
+    .table th.resizable-column.NameGroup,
+    .table td.NameGroup {
+        max-width: 60px;
+    }
+
+    .table th.resizable-column.Address,
+    .table td.Address {
+        max-width: 35px;
+    }
+
+    .table th.resizable-column.DogovirSuborendu,
+    .table td.DogovirSuborendu {
+        max-width: 20px;
+    }
+
+    .table th.resizable-column.DateTime,
+    .table td.DateTime {
+        max-width: 60px;
+    }
+
+    .table th.resizable-column.Suma,
+    .table td.Suma {
+        max-width: 80px;
+    }
+
+    .table th.resizable-column.AktDate,
+    .table td.AktDate {
+        max-width: 50px;
+    }
+
+    .table th.resizable-column.Stan,
+    .table td.Stan {
+        max-width: 40px;
+    }
+
+    .table th.resizable-column.Prumitka,
+    .table td.Prumitka {
+        max-width: 45px;
+    }
+}*/
+@media screen and (min-width: 1280px) and (max-width: 1600px) {
+    .table th.resizable-column.NumberGroup,
+    .table td.NumberGroup {
+        max-width: 40px;
+    }
+
+    .table th.resizable-column.NameGroup,
+    .table td.NameGroup {
+        max-width: 40px;
+    }
+
+    .table th.resizable-column.Address,
+    .table td.Address {
+        max-width: 50px;
+    }
+
+    .table th.resizable-column.DogovirSuborendu,
+    .table td.DogovirSuborendu {
+        max-width: 55px;
+    }
+
+    .table th.resizable-column.DateTime,
+    .table td.DateTime {
+        max-width: 50px;
+    }
+
+    .table th.resizable-column.Suma,
+    .table td.Suma {
+        max-width: 35px;
+    }
+
+    .table th.resizable-column.AktDate,
+    .table td.AktDate {
+        max-width: 50px;
+    }
+
+    .table th.resizable-column.Stan,
+    .table td.Stan {
+        max-width: 60px;
+    }
+
+    .table th.resizable-column.Prumitka,
+    .table td.Prumitka {
+        max-width: 70px;
+    }
+
+    .table th.resizable-column.Schablon,
+    .table td.Schablon {
+        max-width: 45px;
+    }
+}
+
+    .btn.btn-add {
+        background-color: lawngreen !important;
+        color: black;
+    }
+
+    .table.table-custom > :not(caption) > * > * {
+        padding: 0;
+        border-bottom-width: 2px;
+        box-shadow: none;
+    }
+.bg-d {
+    outline: 2px solid #FA836B;
+    outline-offset: -2px;
+    border-radius: 10px;
+}
+
+    .fixed_button {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 20px;
+        z-index: 999;
+        background-color: antiquewhite;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+        .fixed_button:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .fixed_button button {
+            display: block;
+            margin-bottom: 10px;
+            width: 150px;
+        }
+
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background-color: #ffffff;
+    }
+
+        .sticky-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            max-width: 100%;
+            background-color: #eae7dc;
+        }
+
+            .sticky-header .container .logo {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #333333;
+                text-decoration: none;
+            }
+
+        .sticky-header nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+            .sticky-header nav ul li {
+                margin-right: 20px;
+            }
+
+                .sticky-header nav ul li a {
+                    color: #333333;
+                    text-decoration: none;
+                    transition: color 0.3s ease;
+                }
+
+                    .sticky-header nav ul li a:hover {
+                        color: #007bff;
+                    }
+
+    .main-content {
+    }
+
+    .btn.btn-primary.save-row, .btn.btn-primary.add-row {
+        margin-right: 10px;
+    }
+
+    .btn.btn-primary.del-word-btn {
+        background-color: red;
+        border-color: red;
+    }
+
+    .btn.btn-primary.add-to-archive {
+        background-color: orange;
+        border-color: orange;
+    }
+
+    .navbar.navbar-D3 {
+        background-color: #d3cabe !important;
+    }
+
+    #navbarToggleExternalContent .data.data-D3 {
+        background-color: #d3cabe !important;
+    }
+
+
+    /*Test*/
+
+/*    form-Modal-Window*/
+.btn.OpenFile {
+   margin-top: 10px;
+   margin-right:10px;
+}
+.btn.DeleteFile {
+    margin-top: 10px;
+    margin-right: 10px;
+}

@@ -1,0 +1,139 @@
+﻿@page "/Settings"
+@model SRMAgreement.Pages.SettingsModel
+@{
+    ViewData["Title"] = "Налаштування";
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Settings.css" asp-append-version="true" />
+
+<div class="dataBaseSave">
+    <p>Backup Database</p>
+    <form method="post" asp-page-handler="Backup">
+        <button type="submit" class="btn btn-primary save-data-basse">Save Backup</button>
+    </form>
+</div>
+
+<div class="path-to-doc-shab">
+    <form method="post" asp-page-handler="Sample">
+        <label for="pathInput">Шлях до файлів DOCX, PDF</label>
+        <input type="text" id="pathInput" asp-for="FilePath" class="form-control" />
+        <button type="submit" class="btn btn-primary">Save Path</button>
+    </form>
+</div>
+
+
+
+    <div class="suborenda">
+        <div class="settings-Doc">
+            <div class="sublease-name">
+                <h3>Суборенда</h3>
+            </div>
+
+            <form method="post" asp-page-handler="SaveAll">
+                <div class="path-to-doc1">
+                    <input type="text" id="pathInputDoc1" name="FilePathDoc1" class="form-control pathInputDoc1" placeholder="Договір" />
+                </div>
+
+                <div class="path-to-doc2">
+                    <input type="text" id="pathInputDoc2" name="FilePathDoc2" class="form-control pathInputDoc2" placeholder="Акт" />
+                </div>
+
+                <div class="path-to-doc3">
+                    <input type="text" id="pathInputDoc3" name="FilePathDoc3" class="form-control pathInputDoc3" placeholder="Припинення" />
+                </div>
+
+                <div class="path-to-doc4">
+                    <input type="text" id="pathInputDoc4" name="FilePathDoc4" class="form-control pathInputDoc4" placeholder="Акт повернення" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Сохранить все</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="suborenda-tov">
+        <div class="settings-Doc">
+            <div class="sublease-name-tov">
+                <h3>Суборенда ТОВ</h3>
+            </div>
+
+            <form method="post" asp-page-handler="SaveAllTOV">
+                <div class="path-to-doc1-tov">
+                    <input type="text" id="pathInputDoc1tov" name="FilePathDoc1tov" class="form-control pathInputDoc1tov" placeholder="Договір" />
+                </div>
+
+                <div class="path-to-doc2-tov">
+                    <input type="text" id="pathInputDoc2tov" name="FilePathDoc2tov" class="form-control pathInputDoc2tov" placeholder="Акт" />
+                </div>
+
+                <div class="path-to-doc3-tov">
+                    <input type="text" id="pathInputDoc3tov" name="FilePathDoc3tov" class="form-control pathInputDoc3tov" placeholder="Припинення" />
+                </div>
+
+                <div class="path-to-doc4-tov">
+                    <input type="text" id="pathInputDoc4tov" name="FilePathDoc4tov" class="form-control pathInputDoc4tov" placeholder="Акт повернення" />
+                </div>
+
+                <button type="submit" class="btn btn-primary tov">Сохранить все</button>
+            </form>
+        </div>
+    </div>
+
+<div class="rent">
+    <div class="settings-Doc">
+        <div class="rent-name">
+            <h3>Оренда</h3>
+        </div>
+
+        <form method="post" asp-page-handler="SaveAllRent">
+            <div class="path-to-doc1-rent">
+                <input type="text" id="pathInputDoc1tov" name="FilePathDoc1tov" class="form-control pathInputDoc1tov" placeholder="Договір" />
+            </div>
+
+            <div class="path-to-doc2-rent">
+                <input type="text" id="pathInputDoc2tov" name="FilePathDoc2tov" class="form-control pathInputDoc2tov" placeholder="Акт" />
+            </div>
+
+            <div class="path-to-doc3-rent">
+                <input type="text" id="pathInputDoc3tov" name="FilePathDoc3tov" class="form-control pathInputDoc3tov" placeholder="Припинення" />
+            </div>
+
+            <div class="path-to-doc4-rent">
+                <input type="text" id="pathInputDoc4tov" name="FilePathDoc4tov" class="form-control pathInputDoc4tov" placeholder="Акт повернення" />
+            </div>
+
+            <button type="submit" class="btn btn-primary rent">Сохранить все</button>
+        </form>
+    </div>
+</div>
+
+
+
+@* <div class="rent">
+    <div class="settings-rent">
+        <div class="rent-name">
+            <h3>Оренда</h3>
+        </div>
+
+        <form method="post" asp-page-handler="SaveAllRent">
+            <div class="path-to-doc1-rent">
+                <input type="text" id="FilePathDoc_rent1" name="FilePathDoc_rent1" class="form-control" placeholder="Договір" />
+            </div>
+
+            <div class="path-to-doc2-rent">
+                <input type="text" id="FilePathDoc_rent2" name="FilePathDoc_rent2" class="form-control" placeholder="Акт" />
+            </div>
+
+            <div class="path-to-doc3-rent">
+                <input type="text" id="FilePathDoc_rent3" name="FilePathDoc_rent3" class="form-control" placeholder="Припинення" />
+            </div>
+
+            <div class="path-to-doc4-rent">
+                <input type="text" id="FilePathDoc_rent4" name="FilePathDoc_rent4" class="form-control" placeholder="Акт повернення" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+ *@

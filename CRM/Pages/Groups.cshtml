@@ -1,0 +1,454 @@
+﻿@page "{handler?}"
+@model SRMAgreement.Pages.GroupsModel
+@{
+    ViewData["Title"] = "Групи";
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = User.Identity.Name;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isRW = User.IsInRole("RW");
+    var isUser = User.IsInRole("User");
+    var isQW = User.IsInRole("QW");
+        var isBUH = User.IsInRole("BUH");
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="~/css/Groups.css" asp-append-version="true" />
+
+<form method="post">
+    <input class="search" asp-for="SearchQuery" />
+    <button type="submit" name="action" value="Search" class="btn btn-search">Пошук</button>
+</form>
+
+<form id="dataForm" method="post">
+    <div class="sticky-header">
+        <div class="container">
+            <nav>
+                <ul>
+                    <button id="addRowForm" type="submit" name="action" value="AddNewRow" class="btn btn-primary add-row" @(isQW || isUser || isBUH ? "disabled" : "")>Додати рядок</button>
+                    <button id="saveForm" type="submit" name="action" value="SaveChangesWithNewRows" class="btn btn-primary save-row" @(isQW || isUser || isBUH ? "disabled" : "")>Зберегти</button>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" @(isQW || isUser || isBUH ? "disabled" : "")>
+                      Фільтр
+                    </button>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="table main-table">
+        <table id="counterpartyTable" class="table table-bordered table-responsive table-custom">
+            <thead>
+                <tr>
+                    <th class="resizable-column NumberGroup">Номер</th>
+                    <th class="resizable-column NameGroup">Найменування</th>
+                    <th class="resizable-column PIBS">ПІБ</th>
+                    <th class="resizable-column address">Адреса</th>
+                    <th class="resizable-column area">Площа</th>
+                    <th class="resizable-column DateCloseDepartment">Дата закриття відділу</th>
+                    <th class="resizable-column checkbox">Checkbox</th>
+                    <th class="resizable-column buttons">Buttons</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.D2.Count; i++)
+                {
+                    <tr>
+                        <td class="NumberGroup">
+                            <textarea class="form-control auto-resize" name="D2[@i].NumberGroup" @(isQW || isUser|| isBUH ? "readonly" : "")>@Model.D2[i].NumberGroup</textarea>
+                        </td>
+                        <td class="NameGroup">
+                            <textarea class="form-control auto-resize" name="D2[@i].NameGroup" @(isQW || isUser|| isBUH ? "readonly" : "")>@Model.D2[i].NameGroup</textarea>
+                        </td>
+                        <td class="PIBS">
+                            <textarea class="form-control auto-resize" name="D2[@i].PIBS" @(isQW || isUser|| isBUH ? "readonly" : "")>@Model.D2[i].PIBS</textarea>
+                        </td>
+                        <td class="address">
+                            <textarea class="form-control auto-resize" name="D2[@i].address" @(isQW || isUser|| isBUH ? "readonly" : "")>@Model.D2[i].address</textarea>
+                        </td>
+                        <td class="area">
+                            <textarea class="form-control auto-resize" name="D2[@i].area" @(isQW || isUser|| isBUH ? "readonly" : "")>@Model.D2[i].area</textarea>
+                        </td>
+
+                        <td class="DateCloseDepartment">
+                            <input type="date" class="form-control" name="D2[@i].DateCloseDepartment" value="@Model.D2[i].DateCloseDepartment?.ToString("yyyy-MM-dd")" @(isQW || isUser|| isBUH ? "readonly" : "")>
+                        </td>
+
+                        <td class="checkbox">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="D2[@i].isAlert"
+                                   value="true"
+                            @(Model.D2[i].isAlert == true ? "checked" : "") @(isQW || isUser|| isBUH ? "disabled" : "") />
+                            <input type="hidden" name="D2[@i].isAlert" value="false" />
+                        </td> 
+
+                        <td class="buttons">
+                            <button type="button" class="btn btn-primary open-modal-btn"
+                                    data-id="@Model.D2[i].Id"
+                                    data-number-group="@Model.D2[i].NumberGroup"
+                                    data-bs-toggle="modal"
+                                        data-bs-target="#addTaskModal" @(isQW || isUser || isBUH ? "disabled" : "")>
+                                Відкрити
+                            </button>
+                        </td>
+                        <input type="hidden" name="D2[@i].Id" value="@Model.D2[i].Id" />
+                        <input type="hidden" name="D2[@i].NumberGroup" value="@Model.D2[i].NumberGroup" />
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<div id="alert-container" class="mt-3"></div>
+
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">Додати інформацію</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 id="modalNumberGroupHeader">Номер: </h4>
+                <form id="addTaskForm">
+                    <select class="form-select" id="select-status-form" required>
+                        <option value="" selected>Виберіть тип</option>
+                        <option value="Sublease">Суборенда</option>
+                        <option value="Rent-1">Оренда - Свідоцтво</option>
+                        <option value="Rent-2">Оренда - Витяг</option>
+                    </select>
+
+                <div id="Sublease" class="input-section" style="display: none;">
+                    
+                        <input type="hidden" name="TestviewTest.Id" id="modalId" value="@Model.TestviewTest?.Id">
+                        <input type="hidden" id="modalNumberGroup" name="TestviewTest.NumberGroup" />
+                        <hr></hr>
+                        <h5 class="title-modal-window">Суборенда</h5>
+
+                        <div class="mb-3">
+                            <label for="contractNumber" class="form-label">Договір оренди</label>
+                            <input type="text" class="form-control" id="contractNumber" name="TestviewTest.Num" value="@Model.TestviewTest?.Num" required placeholder="№">
+                        </div>
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">Дата початку</label>
+                            <input type="date" class="form-control" id="startDate" name="TestviewTest.Date" value="@Model.TestviewTest?.Date?.ToString("yyyy-MM-dd")" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="personName" class="form-label">Фізична особа</label>
+                            <input type="text" class="form-control" id="personName" name="TestviewTest.Name" value="@Model.TestviewTest?.Name" placeholder="ПІБ" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rnokpp" class="form-label">РНОКПП</label>
+                            <input type="text" class="form-control" id="rnokpp" name="TestviewTest.rnokpp" value="@Model.TestviewTest?.rnokpp" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">ЄДРПОУ</label>
+                            <input type="text" class="form-control" id="status" name="TestviewTest.status" value="@Model.TestviewTest?.status" required>
+                        </div>
+                    
+                </div>
+
+                <div id="Rent-1" class="input-section" style="display: none;">
+                    <hr></hr>
+                    <h5 class="title-modal-window">Оренда</h5>
+
+                    <div class="mb-3">
+                        <label for="contractNumber" class="form-label">Серія свідоцтва</label>
+                        <input type="text" class="form-control" id="CertificateSeries" name="TestviewTest.Certificate_Series" value="@Model.TestviewTest?.Certificate_Series" required placeholder="№">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contractNumber" class="form-label">Номер свідоцтва</label>
+                        <input type="text" class="form-control" id="CertificateNumber" name="TestviewTest.Certificate_Number" value="@Model.TestviewTest?.Certificate_Number" required placeholder="№">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contractNumber" class="form-label">Виданий</label>
+                        <input type="text" class="form-control" id="Issued" name="TestviewTest.Issued" value="@Model.TestviewTest?.Issued" required placeholder="№">
+                    </div>
+                </div>
+                    
+                <div id="Rent-2" class="input-section" style="display: none;">
+                            <hr></hr>
+                    <h5 class="title-modal-window">Оренда</h5>
+                    <div class="mb-3">
+                        <label for="contractNumber" class="form-label">Дата</label>
+                        <input type="date" class="form-control" id="RegistrationDate" name="TestviewTest.Registration_Date" value="@Model.TestviewTest?.Registration_Date?.ToString("yyyy-MM-dd")" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contractNumber" class="form-label">Індексний номер</label>
+                        <input type="text" class="form-control" id="IndexNumber" name="TestviewTest.Index_Number" value="@Model.TestviewTest?.Index_Number" required placeholder="№">
+                    </div>
+                </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+                        <button type="button" class="btn btn-primary" id="saveButton">Зберегти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Вне холста</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+  </div>
+  <div class="offcanvas-body">
+    
+
+
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Status selection change event
+        document.getElementById('select-status-form').addEventListener('change', function () {
+            const suborendaSection = document.getElementById('Sublease');
+            const orendaSvidotstvoSection = document.getElementById('Rent-1');
+            const orendaVutyagSection = document.getElementById('Rent-2');
+
+            // Hide all sections initially
+            suborendaSection.style.display = 'none';
+            orendaSvidotstvoSection.style.display = 'none';
+            orendaVutyagSection.style.display = 'none';
+
+            // Show the selected section based on the dropdown value
+            if (this.value === 'Sublease') {
+                suborendaSection.style.display = 'block';
+            } else if (this.value === 'Rent-1') {
+                orendaSvidotstvoSection.style.display = 'block';
+            } else if (this.value === 'Rent-2') {
+                orendaVutyagSection.style.display = 'block';
+            }
+        });
+
+        // Trigger the change event on page load to show the right section if needed
+        document.getElementById('select-status-form').dispatchEvent(new Event('change'));
+
+        const modalButtons = document.querySelectorAll('.open-modal-btn');
+
+        modalButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                currentNumberGroup = this.getAttribute('data-number-group');
+                document.getElementById('modalNumberGroupHeader').innerText = `Номер: ${currentNumberGroup}`;
+                document.getElementById('modalId').value = id;
+                document.getElementById('modalNumberGroup').value = currentNumberGroup;
+
+                fetch(`/ModalWindowGroupsPage/GetDataById/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Fetched data:', data);
+                        if (data.success) {
+                            document.getElementById('contractNumber').value = data.data.num || '';
+                            document.getElementById('startDate').value = data.data.date ? new Date(data.data.date).toISOString().split('T')[0] : '';
+                            document.getElementById('personName').value = data.data.name || '';
+                            document.getElementById('rnokpp').value = data.data.rnokpp || '';
+                            document.getElementById('status').value = data.data.status || '';
+
+                            document.getElementById('CertificateSeries').value = data.data.Certificate_Series || '';
+                            document.getElementById('CertificateNumber').value = data.data.Certificate_Number || '';
+                            document.getElementById('Issued').value = data.data.Issued || '';
+                            document.getElementById('RegistrationDate').value = data.data.Registration_Date ? new Date(data.data.Registration_Date).toISOString().split('T')[0] : '';
+                            document.getElementById('IndexNumber').value = data.data.Index_Number || '';
+
+                            const statusSelect = document.getElementById('select-status-form');
+                            const statusRecord = data.data.Status_Record || '';
+                            console.log('Status_record:', statusRecord);
+
+                            // Set the dropdown value and trigger the change event
+                            if ([...statusSelect.options].some(option => option.value === statusRecord)) {
+                                statusSelect.value = statusRecord;
+                                console.log(`Set dropdown value to: ${statusRecord}`);
+                            } else {
+                                console.warn('Invalid status record:', statusRecord);
+                                statusSelect.value = '';
+                            }
+
+                            // Trigger change event to show the correct input section
+                            statusSelect.dispatchEvent(new Event('change'));
+
+                        } else {
+                            clearModalForm();
+                            console.error('Error fetching data:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        clearModalForm();
+                        console.error('Error fetching data:', error);
+                    });
+            });
+        });
+
+        function clearModalForm() {
+            document.getElementById('modalId').value = '';
+            document.getElementById('contractNumber').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('personName').value = '';
+            document.getElementById('rnokpp').value = '';
+            document.getElementById('status').value = '';
+            document.getElementById('modalNumberGroup').value = '';
+            document.getElementById('CertificateSeries').value = '';
+            document.getElementById('CertificateNumber').value = '';
+            document.getElementById('Issued').value = '';
+            document.getElementById('RegistrationDate').value = '';
+            document.getElementById('IndexNumber').value = '';
+            document.getElementById('select-status-form').value = '';
+        }
+
+        // Save button event listener
+        document.getElementById('saveButton').addEventListener('click', function () {
+            const form = document.getElementById('addTaskForm');
+            const formData = new FormData(form);
+
+            const getISODate = (dateString) => {
+                if (!dateString) return null;
+                const date = new Date(dateString);
+                return isNaN(date.getTime()) ? null : date.toISOString();
+            };
+
+            const data = {
+                Num: formData.get('TestviewTest.Num') || '',
+                Date: getISODate(formData.get('TestviewTest.Date')),
+                Name: formData.get('TestviewTest.Name') || '',
+                rnokpp: formData.get('TestviewTest.rnokpp') || '',
+                status: formData.get('TestviewTest.status') || '',
+                Certificate_Series: formData.get('TestviewTest.Certificate_Series') || '',
+                Certificate_Number: formData.get('TestviewTest.Certificate_Number') || '',
+                Issued: formData.get('TestviewTest.Issued') || '',
+                Registration_Date: getISODate(formData.get('TestviewTest.Registration_Date')),
+                Index_Number: formData.get('TestviewTest.Index_Number') || '',
+                NumberGroup: currentNumberGroup,
+                Status_Record: document.getElementById('select-status-form').value
+            };
+
+            console.log('Data being sent:', data);
+
+            fetch('/ModalWindowGroupsPage/AddRentData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Дані успішно збережено!', 'success');
+                        // window.location.href = '/Groups';
+                    } else {
+                        showAlert('Помилка: ' + data.message, 'danger');
+                        console.error('Error saving data:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+
+    function showAlert(message, type) {
+        const alertHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = alertHTML;
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+                setTimeout(() => alert.remove(), 300);
+            }
+        }, 5000);
+    }
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(function (modal) {
+            modal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var id = button.getAttribute('data-id');
+                console.log('Modal opened for ID:', id);
+
+                var inputId = modal.querySelector('input[name="Testview[0].Id"]');
+                if (inputId) {
+                    inputId.value = id;
+                }
+            });
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var saveButton = document.getElementById('saveForm');
+
+        saveButton.addEventListener('click', function (event) {
+            var form = document.getElementById('dataForm');
+            var isEmpty = false;
+
+            for (let i = 0; i < form.elements.length; i++) {
+                let element = form.elements[i];
+                let elementName = element.name || "";
+
+                if (
+                    elementName.includes(".NumberGroup") ||
+                    elementName.includes(".NameGroup") ||
+                    elementName.includes(".address")
+                ) {
+                    if (!element.value.trim()) {
+                        isEmpty = true;
+                        element.classList.add("is-invalid");
+                    } else {
+                        element.classList.remove("is-invalid");
+                    }
+                }
+            }
+
+            if (isEmpty) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const textareas = document.querySelectorAll('textarea.auto-resize');
+
+        textareas.forEach(textarea => {
+            const adjustHeight = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            };
+
+            adjustHeight(textarea);
+
+            textarea.addEventListener('input', () => adjustHeight(textarea));
+        });
+    });
+</script>

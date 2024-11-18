@@ -1,0 +1,149 @@
+﻿@page
+@model SRMAgreement.Pages.CounterpartyModel
+@{
+    ViewData["Title"] = "Контрагенти";
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = User.Identity.Name;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isRW = User.IsInRole("RW");
+    var isUser = User.IsInRole("User");
+    var isQW = User.IsInRole("QW");
+    var isBUH = User.IsInRole("BUH");
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/CounterpartyPage.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-resizable-columns/dist/jquery.resizableColumns.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-resizable-columns/dist/jquery.resizableColumns.min.js"></script>
+
+<form method="post">
+    <input class="search" asp-for="SearchQuery"></input>
+    <button type="submit" name="action" value="Search" class="btn btn-search">Поиск</button>
+</form>
+
+
+<form id="dataForm" method="post">
+    <div class="sticky-header">
+        <div class="container">
+            <nav>
+                <ul>
+                    <button id="addRowForm" type="submit" name="action" value="AddNewRow" class="btn btn-primary add-row" @(isQW || isUser || isBUH ? "disabled" : "")>Додати рядок</button>
+                    <button id="saveForm" type="submit" name="action" value="SaveChangesWithNewRows" class="btn btn-primary save-row" @(isQW || isUser || isBUH ? "disabled" : "")>Зберегти</button>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="container main-content">
+        <table id="counterpartyTable" class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th class="resizable-column NameGroup">Назва відділення</th>  @* 1 *@
+                    <th class="resizable-column Fullname">ПІБ(повне)</th> @* 2 *@
+                    <th class="resizable-column rnokpp">РНОКПП</th> @* 3 *@
+                    <th class="resizable-column address">Місцезнаходження</th> @* 12 *@
+                    <th class="resizable-column edryofop_Data">ЄДРЮОФОП+Дата</th> @* 4 *@
+                    <th class="resizable-column BanckAccount">Рахунок+Назва банку</th> @* 4 *@
+                    <th class="resizable-column Director">Директор</th> @* 4 *@
+                    <th class="resizable-column ResPerson">Відповідальна особа</th> @* 13 *@
+                    <th class="resizable-column Email">E-mail</th> @* 7 *@
+                    <th class="resizable-column Tov">Тов</th> @* 7 *@
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.D1.Count; i++)
+                {
+                    <tr>
+                        <td class="NameGroup">
+                            <select id="NumberGroup-@i" class="form-control auto-resize" name="D1[@i].NameGroup" @(isQW || isUser || isBUH ? "disabled" : "")>
+                                <option value=""> ---- </option>
+                                @foreach (var item in Model.NumberGroupValues)
+                                {
+                                    if (item == Model.D1[i].NameGroup)
+                                    {
+                                        <option value="@item" selected>@item</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td class="Fullname"><textarea class="form-control auto-resize" name="D1[@i].Fullname" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].Fullname</textarea></td>
+                        <td class="rnokpp"><textarea class="form-control auto-resize" name="D1[@i].rnokpp" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].rnokpp</textarea></td>
+                        <td class="address"><textarea class="form-control auto-resize" name="D1[@i].address" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].address</textarea></td>
+                        <td class="edryofop_Data"><textarea class="form-control auto-resize" name="D1[@i].edryofop_Data" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].edryofop_Data</textarea></td>
+                        <td class="BanckAccount"><textarea class="form-control auto-resize" name="D1[@i].BanckAccount" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].BanckAccount</textarea></td>
+                        <td class="Director"><textarea class="form-control auto-resize" name="D1[@i].Director" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].Director</textarea></td>
+                        <td class="ResPerson">
+                            <textarea class="form-control auto-resize" name="D1[@i].ResPerson" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].ResPerson</textarea>
+                            <textarea class="form-control auto-resize" name="D1[@i].Phone" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].Phone</textarea>
+                        </td>
+                        <td class="Email"><textarea class="form-control auto-resize" name="D1[@i].Email" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D1[i].Email</textarea></td>
+                        <td class="Tov">
+                            <input class="form-check-input" type="checkbox" name="D1[@i].Tov" value="true" id="flexCheckDefault_@i"
+                            @(Model.D1[i].Tov == true ? "checked" : "") @(isQW || isUser || isBUH ? "disabled" : "") />
+                        </td>
+                        <input type="hidden" name="D1[@i].Id" value="@Model.D1[i].Id" />
+                    </tr>
+                }
+            </tbody>
+        </table>
+       
+    </div>
+    
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var saveButton = document.getElementById('saveForm');
+
+        saveButton.addEventListener('click', function (event) {
+            var form = document.getElementById('dataForm');
+            var isEmpty = false;
+
+            for (let i = 0; i < form.elements.length; i++) {
+                let element = form.elements[i];
+                let elementName = element.name || "";
+
+                if (
+                    elementName.includes(".NameGroup") ||
+                    elementName.includes(".Fullname") ||
+                    elementName.includes(".rnokpp") ||
+                    elementName.includes(".address") ||
+                    elementName.includes(".edryofop_Data") ||
+                    elementName.includes(".BanckAccount")
+                ) {
+                    if (!element.value.trim()) {
+                        isEmpty = true;
+                        element.classList.add("is-invalid");
+                    } else {
+                        element.classList.remove("is-invalid");
+                    }
+                }
+            }
+
+            if (isEmpty) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const textareas = document.querySelectorAll('textarea.auto-resize');
+
+        textareas.forEach(textarea => {
+            const adjustHeight = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            };
+
+            adjustHeight(textarea);
+
+            textarea.addEventListener('input', () => adjustHeight(textarea));
+        });
+    });
+</script>

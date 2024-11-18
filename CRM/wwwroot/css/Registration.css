@@ -1,0 +1,38 @@
+﻿body {
+}
+
+.signup {
+    width: 500px; /* Ширина контейнера */
+    margin: auto; /* Автоматическое выравнивание по центру по горизонтали */
+    position: absolute; /* Абсолютное позиционирование */
+    top: 50%; /* Разместить верхнюю границу по середине экрана по вертикали */
+    left: 50%; /* Разместить левую границу по середине экрана по горизонтали */
+    transform: translate(-50%, -50%); /* Смещение контейнера на половину его ширины и высоты назад */
+    padding: 20px; /* Поля вокруг контейнера */
+    border-radius: 10px; /* Радиус закругления углов */
+    background-color: #f9f9f9; /* Цвет фона */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Тень */
+    border: 2px solid #ccc; /* Обводка контейнера */
+}
+
+.form-group {
+    margin-bottom: 20px; /* Отступ между элементами формы */
+}
+
+.form-control {
+    width: 100%; /* Ширина инпутов */
+}
+
+
+footer {
+    display: none; /* Скрыть footer */
+}
+
+container {
+    display: none; /* Скрыть footer */
+}
+
+.btn.btn-primary.sign-up {
+    width: 100%; /* Ширина кнопки */
+    background-color: darkolivegreen;
+}

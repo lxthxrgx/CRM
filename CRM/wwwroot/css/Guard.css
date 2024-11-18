@@ -1,0 +1,198 @@
+﻿.container {
+    max-width: 100%;
+    padding: 10px;
+}
+
+textarea.form-control {
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    resize: none;
+    min-height: 38px;
+}
+
+body {
+    background-color: #eae7dc;
+}
+
+.table th, .table td {
+    padding: 5px;
+}
+
+.table tr:hover td {
+    background-color: #f0f0f0 !important;
+}
+
+.table th {
+    background-color: #d8c3a5;
+    font-family: 'Cascadia Mono', sans-serif;
+    text-align: center;
+}
+
+    .table th.resizable-column.NumberGroup,
+    .table td.NumberGroup {
+        max-width: 12px;
+    }
+
+    .table th.resizable-column.NameGroup,
+    .table td.NameGroup {
+        max-width: 20px;
+    }
+
+    .table th.resizable-column.address,
+    .table td.address {
+        max-width: 50px;
+    }
+
+    .table th.resizable-column.OhronnaComp,
+    .table td.OhronnaComp {
+        max-width: 25px;
+    }
+
+    .table th.resizable-column.NumDog,
+    .table td.NumDog {
+        max-width: 19px;
+    }
+
+    .table th.resizable-column.StrokDii,
+    .table td.StrokDii {
+        max-width: 22px;
+    }
+
+    .table th.resizable-column.ResPerson,
+    .table td.ResPerson {
+        max-width: 35px;
+    }
+
+    .table th.resizable-column.Phone,
+    .table td.Phone {
+        max-width: 30px;
+    }
+
+    .table th.resizable-column.Pdf,
+    .table td.Pdf {
+        max-width: 30px;
+    }
+
+
+.btn.btn-add {
+    background-color: lawngreen !important;
+    color: black;
+}
+
+.table.table-custom > :not(caption) > * > * {
+    padding: 0;
+    border-bottom-width: 2px;
+    box-shadow: none;
+}
+
+.bg-d {
+    background-color: #e85a4f;
+}
+
+.fixed_button {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 20px;
+    z-index: 999;
+    background-color: antiquewhite;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+    .fixed_button:hover {
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .fixed_button button {
+        display: block;
+        margin-bottom: 10px;
+        width: 150px;
+    }
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #ffffff;
+}
+
+    .sticky-header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        max-width: 100%;
+        background-color: #eae7dc;
+    }
+
+        .sticky-header .container .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333333;
+            text-decoration: none;
+        }
+
+    .sticky-header nav ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+    }
+
+        .sticky-header nav ul li {
+            margin-right: 20px;
+        }
+
+            .sticky-header nav ul li a {
+                color: #333333;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+                .sticky-header nav ul li a:hover {
+                    color: #007bff;
+                }
+
+.main-content {
+}
+
+.btn.btn-primary.save-row, .btn.btn-primary.add-row {
+    margin-right: 10px;
+}
+
+.btn.btn-primary.del-word-btn {
+    background-color: red;
+    border-color: red;
+}
+
+.btn.btn-primary.add-to-archive {
+    background-color: orange;
+    border-color: orange;
+}
+
+.navbar.navbar-D3 {
+    background-color: #d3cabe !important;
+}
+
+#navbarToggleExternalContent .data.data-D3 {
+    background-color: #d3cabe !important;
+}
+
+#alert-container .alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1060;
+}
+.scrollable-content {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}

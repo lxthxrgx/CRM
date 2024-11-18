@@ -1,0 +1,44 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+   
+}
+.bg-white {
+    --bs-bg-opacity: 1;
+
+}
+
+.navbar-light .navbar-brand {
+    font-family: 'Jost', sans-serif;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+    color: #304040 !important;
+    margin-right: 70px;
+    font-size: 25px;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+    color: black;
+}
+

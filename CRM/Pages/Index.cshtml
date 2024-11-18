@@ -1,0 +1,297 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+    DateTime today = (DateTime)ViewData["Today"];
+    DateTime oneMonthLater = (DateTime)ViewData["OneMonthLater"];
+
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = User.Identity.Name;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isRW = User.IsInRole("RW");
+    var isUser = User.IsInRole("User");
+    var isQW = User.IsInRole("QW");
+    var isBUH = User.IsInRole("BUH");
+}
+
+<link rel="stylesheet" href="~/css/Index.css" />
+
+<div class="info">
+    договори оренди, термін дії яких спливає через місяць
+</div>
+
+<div class="scroll-container">
+    @foreach (var item in Model.D3)
+    {
+        <div class="infoD3">
+
+            <p>Назваа групи: @item.NameGroup</p>
+            <p>Номер групи: @item.NumberGroup</p>
+            <p>Договір оренди: @item.DogovirOrendu</p>
+            <p>Дата укладання: @item.DateTime</p>
+            <p>Строк дії: @item.StrokDii</p>
+            <p>Сума: @item.Suma</p>
+            <p>
+                Стан: @item.Stan
+                <button type="submit" name="action" value="SaveChanges" class="btn btn-primary" @(isQW || isUser || isBUH ? "disabled" : "")>Change</button>
+            </p>
+            <p>Примітка: @item.Prumitka</p>
+        </div>
+    }
+</div>
+
+<div class="info">
+    договори субренда, термін дії яких спливає через місяць
+</div>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="NameGroup-thead">Найменування</th>
+                <th class="NumberGroup-thead">Номер</th>
+                <th class="DogovirSuborendu-thead">Договір оренди</th>
+                <th class="DateTime-thead">Дата укладання</th>
+                <th class="StrokDii-thead">Строк дії</th>
+                <th class="Stan-thead">Стан</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.D4)
+            {
+                <tr class="task" data-id="@item.NumberGroup">
+                    <td>@item.NameGroup</td>
+                    <td>@item.NumberGroup</td>
+                    <td>@item.DogovirSuborendu</td>
+                    <td>@item.DateTime.ToString("dd.MM.yyyy")</td>
+
+                    <td>
+                        @if (item.EndAktDate >= (DateTime)ViewData["Today"] && item.EndAktDate <= (DateTime)ViewData["OneMonthLater"])
+                        {
+                            @item.EndAktDate.ToString("dd/MM/yyyy")
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   data-id="@item.Id"
+                                   id="check_@item.NumberGroup"
+                                   onchange="checkboxChanged(this)"
+                            @(item.Done == true ? "checked" : "") @(isQW || isUser || isBUH ? "disabled" : "")>
+                            <label class="form-check-label" for="check_@item.NumberGroup">
+                                Виконано
+                            </label>
+                        </div>
+                    </td>
+
+
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+
+
+<div class="info">
+    договори охорона, термін дії яких спливає через місяць
+</div>
+
+<div class="scroll-container">
+    @foreach (var item in Model.D5)
+    {
+        <div class="infoD3">
+            <p>Номер групи: @item.NumberGroup</p>
+            
+            <p>Договір оренди: @item.NumDog</p>
+            <p>Строк дії: @item.StrokDii</p>
+
+
+        </div>
+    }
+</div>
+
+<nav id="context-menu" class="context-menu">
+    <ul class="context-menu__items">
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="view" data-id="PLACEHOLDER_ID">
+                <i class="fa fa-eye"></i> Повна інформація
+            </a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="edit" data-id="PLACEHOLDER_ID">
+                <i class="fa fa-edit"></i> Змінити стан
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    (function () {
+        "use strict";
+
+        function clickInsideElement(e, className) {
+            var el = e.target;
+            if (el.classList.contains(className)) {
+                return el;
+            } else {
+                while (el = el.parentNode) {
+                    if (el.classList && el.classList.contains(className)) {
+                        return el;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function getPosition(e) {
+            var posx = 0, posy = 0;
+            if (!e) var e = window.event;
+            if (e.pageX || e.pageY) {
+                posx = e.pageX;
+                posy = e.pageY;
+            } else if (e.clientX || e.clientY) {
+                posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            }
+            return { x: posx, y: posy };
+        }
+
+        var contextMenuClassName = "context-menu";
+        var contextMenuLinkClassName = "context-menu__link";
+        var contextMenuActive = "context-menu--active";
+        var taskItemClassName = "task";
+        var taskItemInContext;
+        var menu = document.querySelector("#context-menu");
+        var menuState = 0;
+
+        function init() {
+            contextListener();
+            clickListener();
+            keyupListener();
+            resizeListener();
+        }
+
+        function contextListener() {
+            document.addEventListener("contextmenu", function (e) {
+                taskItemInContext = clickInsideElement(e, taskItemClassName);
+                if (taskItemInContext) {
+                    e.preventDefault();
+                    toggleMenuOn();
+                    positionMenu(e);
+                    var id = taskItemInContext.getAttribute("data-id");
+                    updateMenuLinks(id);
+                } else {
+                    taskItemInContext = null;
+                    toggleMenuOff();
+                }
+            });
+        }
+
+        function updateMenuLinks(id) {
+            var links = document.querySelectorAll(".context-menu__link");
+            links.forEach(function (link) {
+                var action = link.getAttribute("data-action");
+                if (action === "view") {
+                    link.setAttribute("href", `/Sublease?handler=ByNumber&number=${encodeURIComponent(id)}`);
+                } else if (action === "edit") {
+                    link.setAttribute("href", `/Sublease?handler=EditTask&number=${encodeURIComponent(id)}`);
+                }
+            });
+        }
+
+        function clickListener() {
+            document.addEventListener("click", function (e) {
+                var clickedElIsLink = clickInsideElement(e, contextMenuLinkClassName);
+                if (clickedElIsLink) {
+                    e.preventDefault();
+                    var href = clickedElIsLink.getAttribute("href");
+                    if (href && href !== "#") {
+                        window.location.href = href;
+                    }
+                    toggleMenuOff();
+                } else {
+                    if (e.which === 1) { // Left click
+                        toggleMenuOff();
+                    }
+                }
+            });
+        }
+
+        function keyupListener() {
+            window.onkeyup = function (e) {
+                if (e.keyCode === 27) {
+                    toggleMenuOff();
+                }
+            }
+        }
+
+        function resizeListener() {
+            window.onresize = function () {
+                toggleMenuOff();
+            };
+        }
+
+        function toggleMenuOn() {
+            if (menuState !== 1) {
+                menuState = 1;
+                menu.classList.add(contextMenuActive);
+            }
+        }
+
+        function toggleMenuOff() {
+            if (menuState !== 0) {
+                menuState = 0;
+                menu.classList.remove(contextMenuActive);
+            }
+        }
+
+        function positionMenu(e) {
+            var clickCoords = getPosition(e);
+            var menuWidth = menu.offsetWidth + 4;
+            var menuHeight = menu.offsetHeight + 4;
+            var windowWidth = window.innerWidth;
+            var windowHeight = window.innerHeight;
+
+            menu.style.left = (windowWidth - clickCoords.x < menuWidth) ? (windowWidth - menuWidth) + "px" : clickCoords.x + "px";
+            menu.style.top = (windowHeight - clickCoords.y < menuHeight) ? (windowHeight - menuHeight) + "px" : clickCoords.y + "px";
+        }
+
+        init();
+    })();
+    });
+</script>
+
+<script>
+    function checkboxChanged(checkbox) {
+        var id = checkbox.getAttribute('data-id');
+        var isChecked = checkbox.checked;
+
+        var data = {
+            Id: id,  // Изменено здесь на Id
+            IsDone: isChecked
+        };
+        console.log('Отправляемые данные:', JSON.stringify(data));
+        $.ajax({
+            url: '/IndexController/UpdateDone',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                console.log('Файл успешно обновлен');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('Ошибка AJAX: ' + textStatus + ' : ' + errorThrown);
+            }
+        });
+    }
+
+</script>

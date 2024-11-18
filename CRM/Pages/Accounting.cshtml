@@ -1,0 +1,274 @@
+﻿@page
+@model SRMAgreement.Pages.BookkeepingModel
+@{
+}
+<link rel="stylesheet" href="~/css/Accounting.css" asp-append-version="true" />
+
+<div class="tools-container">
+    <form method="post" asp-page-handler="SearchQuery">
+        <input type="text" class="form-control search" name="SearchQuery" placeholder="Пошук" />
+        <button class="btn btn-primary search" type="submit">))</button>
+    </form>
+  
+    <button class="btn btn-primary filter" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" onclick="LoadFilters()">
+        Фільтр
+    </button>
+
+</div>
+
+<div class="">
+    <a href="/Subleasebuh" class="btn btn-primary">Суборенда Бух.</a>
+</div>
+
+<div class="strip-container">
+    @foreach (var group in Model.D4List.GroupBy(x => x.NumberGroup))
+    {
+        <div class="strip">
+            @functions {
+            string GetMinutesString(int minutes)
+            {
+                if (minutes == 1) return "хвилину тому";
+                if (minutes >= 2 && minutes <= 4) return $"{minutes} хвилини тому";
+                return $"{minutes} хвилин тому";
+            }
+            string GetHoursString(int hours)
+            {
+                if (hours == 1) return "годину тому";
+                if (hours >= 2 && hours <= 4) return $"{hours} години тому";
+                return $"{hours} годин тому";
+            }
+
+            string GetDaysString(int days)
+            {
+                if (days == 1) return "день тому";
+                if (days >= 2 && days <= 4) return $"{days} дні тому";
+                return $"{days} днів тому";
+            }
+        }
+
+        <div class="strip-header">
+            <strong>Номер відділення: @group.Key</strong>
+        </div>
+
+        @{
+                DateTime now = DateTime.Now;
+                DateTime updateRecord = group.Max(g => g.Updatet_Record) ?? DateTime.MinValue;
+
+                TimeSpan difference = now - updateRecord;
+                string timeMessage = "";
+
+                if (difference.TotalMinutes < 1)
+                {
+                    timeMessage = "Тільки що";
+                }
+                else if (difference.TotalMinutes < 60)
+                {
+                    timeMessage = GetMinutesString((int)difference.TotalMinutes);
+                }
+                else if (difference.TotalHours < 24)
+                {
+                    timeMessage = GetHoursString((int)difference.TotalHours);
+                }
+                else if (difference.TotalDays < 7)
+                {
+                    timeMessage = GetDaysString((int)difference.TotalDays);
+                }
+                else if (updateRecord == DateTime.MinValue)
+                {
+                    timeMessage = "Ніколи";
+                }
+                else
+                {
+                    timeMessage = updateRecord.ToString("dd MMMM yyyy");
+                }
+            }
+
+            <div class="strip-body">
+                <h6 data-bs-toggle="tooltip" data-bs-placement="right" title="@updateRecord.ToString("dd.MM.yyyy HH:mm")">
+                    Оновлено: @timeMessage
+                </h6>
+
+                <p><strong>Контрагент</strong></p>
+                @{
+                    var counterpartyItem = Model.Counterparty.FirstOrDefault(g => g.NameGroup == group.FirstOrDefault()?.NameGroup);
+                }
+                <div class="flex-row">
+                    <p><strong>Назва відділення:</strong> @counterpartyItem?.NameGroup</p>
+                    <p><strong>ПІБ:</strong> @counterpartyItem?.Fullname</p>
+                    <p><strong>РНОКПП:</strong> @counterpartyItem?.rnokpp</p>
+                    <p><strong>Рахунок:</strong> @counterpartyItem?.BanckAccount</p>
+                    <p><strong>Відповідальна особа:</strong> @counterpartyItem?.ResPerson</p>
+                    <p><strong>Телефон:</strong> @counterpartyItem?.Phone</p>
+                    <p><strong>Тов:</strong> @counterpartyItem?.Tov</p>
+                </div>
+
+                <p><strong>Суборенда</strong></p>
+                @foreach (var i in group)
+                {
+                <div class="flex-row">
+                    
+                        <p><strong>Назва відділення:</strong> @i?.NameGroup</p>
+                        <p><strong>Договір суборенди:</strong> @i.DogovirSuborendu</p>
+                        <p><strong>Дата укладання:</strong> @i.DateTime.ToShortDateString()</p>
+                        <p><strong>Сума:</strong> @i.Suma</p>
+                        <p><strong>Кінцева дата акту:</strong> @i.EndAktDate.ToShortDateString()</p>
+                  
+                </div>
+                }
+
+                <p><strong>Охоронна</strong></p>
+                @{
+                    var guardItem = Model.Guard.FirstOrDefault(g => g.NumberGroup == group.Key);
+                }
+                <div class="flex-row">
+                    <p><strong>Охоронна копанія:</strong> @guardItem?.OhronnaComp</p>
+                    <p><strong>Номер договору:</strong> @guardItem?.NumDog</p>
+                    <p><strong>Строк дії:</strong> @guardItem?.StrokDii.ToShortDateString()</p>
+                    <p><strong>Відповідальна особа:</strong> @guardItem?.ResPerson</p>
+                    <p><strong>Телефон:</strong> @guardItem?.Phone</p>
+                    <button class="btn btn-primary" id="button-@guardItem?.Id" onclick="openDocuments(@guardItem?.Id)" type="button">Відкрити всі PDF</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+        </div>
+    }
+</div>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Фільтр</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="post" asp-page-handler="GetData" class="form1">
+            <h6>Назва групи</h6>
+            <div class="scrollable-content" id="filterContainer">
+            </div>
+
+            <hr>
+
+            <h6>Дата</h6>
+            <div class="date-range-toggle">
+                <label for="single-date">Виберіть дату:</label>
+                <input type="date" class="form-control" asp-for="FilterData.StartDate" id="single-date">
+
+                <div>
+                    <input class="form-check-input" type="checkbox" id="toggle-range">
+                    <label for="toggle-range" class="form-check-label">Вибрати діапазон дат</label>
+                </div>
+
+                <div id="end-date-container" style="display: none;">
+                    <label for="end-date">Кінцева дата:</label>
+                    <input type="date" class="form-control" asp-for="FilterData.EndDate" id="end-date">
+                </div>
+            </div>
+
+            <hr>
+
+            <button class="btn btn-primary agree" type="submit">Застосувати</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function openDocuments(buttonId) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', `/LoadPDFController/GetDocumentById?id=${encodeURIComponent(buttonId)}`, true);
+        xhr.responseType = 'json'; // Ожидаем JSON-ответ с URL-ами файлов
+
+        xhr.onload = function () {
+            if (this.status === 200 && Array.isArray(this.response)) {
+                var fileUrls = this.response;
+
+                // Открываем каждый файл в новой вкладке
+                fileUrls.forEach(function (fileUrl) {
+                    window.open(fileUrl, '_blank'); // Открываем каждый файл в новой вкладке
+                });
+            } else {
+                console.error('Ошибка при загрузке списка файлов:', this.status);
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Ошибка сети при загрузке файлов');
+        };
+
+        xhr.send();
+    }
+
+</script>
+
+
+<script>
+    function LoadFilters() {
+        $.ajax({
+            url: '/AccountingCon/GetGroupByNameGroupAsync',
+            type: 'GET',
+            success: function (response) {
+                var checkboxHtml = "";
+                response.forEach(function (nameGroup) {
+                    checkboxHtml += `
+                        <div class="form-check">
+                            <input class="form-check-input group-checkbox" type="checkbox" name="FilterData.Groups" value="${nameGroup}" id="filter_${nameGroup}">
+                            <label class="form-check-label" for="filter_${nameGroup}">
+                                ${nameGroup}
+                            </label>
+                        </div>`;
+                });
+                document.getElementById('filterContainer').innerHTML = checkboxHtml;
+            },
+            error: function (xhr, status, error) {
+                console.error("Ошибка: " + status + " - " + error);
+            }
+        });
+    }
+
+    function collectGroups() {
+        var selectedGroups = [];
+
+        document.querySelectorAll('.group-checkbox:checked').forEach(function (checkbox) {
+            selectedGroups.push(checkbox.value);
+        });
+
+        document.getElementById('groupInput').value = JSON.stringify(selectedGroups);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var toggleRangeCheckbox = document.getElementById('toggle-range');
+        var endDateContainer = document.getElementById('end-date-container');
+
+        toggleRangeCheckbox.addEventListener('click', function () {
+            if (toggleRangeCheckbox.checked) {
+                endDateContainer.style.display = 'block';
+            } else {
+                endDateContainer.style.display = 'none';
+                document.getElementById('end-date').value = '';
+            }
+        });
+    });
+</script>
+
+<script>
+    function openDocument(id) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('GET', `/LoadPDFController/GetDocument/${id}`, true);
+
+        xhr.responseType = 'blob';
+
+        xhr.onload = function (e) {
+            if (this.status == 200) {
+                var blob = new Blob([this.response], { type: 'application/pdf' });
+
+                var url = URL.createObjectURL(blob);
+                window.open(url);
+            } else {
+                console.error('Error downloading PDF:', this.status);
+            }
+        };
+        xhr.send();
+    }
+</script>
+

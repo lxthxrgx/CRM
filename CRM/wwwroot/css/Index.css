@@ -1,0 +1,112 @@
+﻿.dogoren {
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 40px;
+    margin-left: 10px;
+    margin-right: 10px;
+    position: relative;
+}
+
+.infoD3 {
+    display: inline-table;
+    border: 1px solid #d8c3a5;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: #d8c3a5;
+}
+.scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px 0;
+}
+.info {
+    display: flex;
+    color: #e85a4f;
+    font-weight: bold;
+    font-size: 30px;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-header {
+    position: absolute;
+    top: 0; 
+    left: 0;
+}
+body {
+    background-color: #eae7dc;
+}
+
+/*New Table*/
+
+.table-container {
+    border-radius: 10px;
+    overflow: hidden; /* Ensures the table's corners are clipped */
+    border: 1px solid #ddd; /* Optional: to give a border to the container */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background-color: #d8c3a5 !important; /* Background color for the headers */
+    padding: 10px !important;
+    text-align: left !important; /* Aligns text to the left */
+}
+
+.table td {
+    padding: 10px; /* Adds padding for better spacing */
+    border-bottom: 1px solid #ccc !important; /* Adds a border between rows */
+}
+
+
+tr:hover { /*dont work*/
+    background-color: coral;
+}   
+
+
+/*Context Menu*/
+.context-menu {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.context-menu--active {
+    display: block;
+}
+
+.context-menu__items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.context-menu__item {
+    padding: 8px 12px;
+}
+
+.context-menu__link {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+    .context-menu__link:hover {
+        background-color: #f5f5f5;
+    }

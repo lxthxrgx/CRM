@@ -1,0 +1,403 @@
+﻿@page
+@model SRMAgreement.Pages.GuardModel
+@{
+    <meta charset="utf-8" />
+    ViewData["Title"] = "Охорона";
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = User.Identity.Name;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isRW = User.IsInRole("RW");
+    var isUser = User.IsInRole("User");
+    var isQW = User.IsInRole("QW");
+    var isBUH = User.IsInRole("BUH");
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="~/css/Guard.css" asp-append-version="true" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/DropDown.js"></script>
+<script src="/js/Pages/Guard/Guard.js"></script>
+
+<form method="post">
+    <input class="search" asp-for="SearchQuery" />
+    <button type="submit" name="action" value="Search" class="btn btn-search">Поиск</button>
+
+</form>
+
+<form id="dataForm" method="post">
+    <div class="sticky-header">
+        <div class="container">
+            <nav>
+                <ul>
+                    <button id="addRowForm" type="submit" name="action" value="AddNewRow" class="btn btn-primary add-row" @(isQW || isUser || isBUH ? "disabled" : "")>Додати рядок</button>
+                    <button id="saveForm" type="submit" name="action" value="SaveChangesWithNewRows" class="btn btn-primary save-row" @(isQW || isUser || isBUH ? "disabled" : "")>Зберегти</button>
+                    <button class="btn btn-primary filter" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" onclick="LoadFilters()">
+                        Фільтр
+                    </button>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="table main-table">
+        <table id="counterpartyTable" class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th class="resizable-column NumberGroup">Номер</th>
+                    <th class="resizable-column NameGroup">Найменування</th>
+                    <th class="resizable-column address">Адреса</th>
+                    <th class="resizable-column OhronnaComp">Охоронна копанія</th>
+                    <th class="resizable-column NumDog">Номер договору</th>
+                    <th class="resizable-column StrokDii">Дата укладання</th>
+                    <th class="resizable-column ResPerson">Відповідальна особа</th>
+                    <th class="resizable-column Pdf">Pdf</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.D5.Count; i++)
+                {
+                    <tr>
+                        <td class="NumberGroup">
+                            <select class="form-control" id="numberGroup-@i" name="D5[@i].NumberGroup" @(isQW || isUser || isBUH ? "disabled" : "")>
+                                <option value="" selected>----</option>
+                                @foreach (var item in Model.NumberGroupValues)
+                                {
+                                    if (item == Model.D5[i].NumberGroup)
+                                    {
+                                        <option value="@item" selected>@item</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td class="NameGroup">
+                            <textarea readonly class="form-control auto-resize" id="NameGroup-@i" name="D5[@i].NameGroup" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i].NameGroup</textarea>
+                        </td>
+                        <td class="address">
+                            <textarea readonly class="form-control auto-resize" id="address-@i" name="D5[@i].address" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i].address</textarea>
+                        </td>
+                        <td class="OhronnaComp">
+                            <textarea class="form-control auto-resize" name="D5[@i].OhronnaComp" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i].OhronnaComp</textarea>
+                        </td>
+
+                        <td class="NumDog">
+                            <textarea class="form-control auto-resize" name="D5[@i].NumDog" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i].NumDog</textarea>
+                            <textarea class="form-control auto-resize" name="D5[@i].NumDog2" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i]?.NumDog2</textarea>
+                        </td>
+
+                        <td class="StrokDii">
+                            <input type="date" class="form-control" name="D5[@i].StrokDii" value="@((Model.D5[i].StrokDii != DateTime.MinValue) ? Model.D5[i].StrokDii.ToString("yyyy-MM-dd") : string.Empty)" @(isQW || isUser ? "readonly" : "") />
+                            <input type="date" class="form-control" name="D5[@i].StrokDii2"
+                                   value="@(Model.D5[i]?.StrokDii2.HasValue == true ? Model.D5[i].StrokDii2.Value.ToString("yyyy-MM-dd") : string.Empty)" @(isQW || isUser || isBUH ? "readonly" : "") />
+                        </td>
+
+                        <td class="ResPerson">
+                            <textarea class="form-control auto-resize" name="D5[@i].ResPerson" placeholder="Від. особа" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i].ResPerson</textarea>
+                            <textarea class="form-control auto-resize" name="D5[@i].Phone" placeholder="Телефон" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D5[i]?.Phone</textarea>
+                        </td>
+
+                        <td class="Pdf">
+                            <div class="mb-3 form-control-file">
+                                <input class="form-control" type="file" id="fileUpload-@i" name="D5[@i].FileUploads" multiple @(isQW || isUser || isBUH ? "disabled" : "")>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="loadPDFFiles(this)" data-index="@i" @(isQW || isUser || isBUH ? "disabled" : "")>Upload</button>
+
+                            <select id="fileSelect-@i" class="form-select" @(isQW || isUser || isBUH ? "disabled" : "")>
+                                <option value="">Виберіть файл</option>
+                                @foreach (var file in Model.D5[i].PathToFilesGuard)
+                                {
+                                    var fileName = file.PathTOServerFiles;
+                                    var lastSlashIndex = fileName.LastIndexOfAny(new char[] { '/', '\\' });
+
+                                    if (lastSlashIndex >= 0 && lastSlashIndex < fileName.Length - 1)
+                                    {
+                                        fileName = fileName.Substring(lastSlashIndex + 1);
+                                    }
+
+                                    <option value="@file.PathTOServerFiles">@fileName</option>
+                                }
+                            </select>
+                            <button type="button" id="openBtn-@i" class="btn btn-info btn-primary" onclick="openDocument('openBtn-@i')" @(isQW || isUser || isBUH ? "disabled" : "")>Відкрити файл</button>
+                            <button type="button" id="deleteBtn-@i" class="btn btn-danger btn-primary" onclick="DeleteDocument('deleteBtn-@i')" @(isQW || isUser || isBUH ? "disabled" : "")>Видалити</button>
+                        </td>
+
+                        <input type="hidden" name="D5[@i].Id" value="@Model.D5[i].Id" />
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Фільтр</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="post" asp-page-handler="GetData" class="form1">
+            <h6>Назва групи</h6>
+            <div class="scrollable-content" id="filterContainer">
+            </div>
+
+            <hr>
+
+            <h6>Дата</h6>
+            <div class="date-range-toggle">
+                <label for="single-date">Виберіть дату:</label>
+                <input type="date" class="form-control" asp-for="FilterData.StartDate" id="single-date">
+
+                <div>
+                    <input class="form-check-input" type="checkbox" id="toggle-range">
+                    <label for="toggle-range" class="form-check-label">Вибрати діапазон дат</label>
+                </div>
+
+                <div id="end-date-container" style="display: none;">
+                    <label for="end-date">Кінцева дата:</label>
+                    <input type="date" class="form-control" asp-for="FilterData.EndDate" id="end-date">
+                </div>
+            </div>
+
+            <hr>
+
+            <button class="btn btn-primary agree" type="submit">Застосувати</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', function (event) {
+        var offcanvasElement = document.getElementById('offcanvasExample');
+        var offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement);
+
+        // Проверяем, является ли клик вне оффканваса и его кнопки закрытия
+        if (offcanvasInstance && !offcanvasElement.contains(event.target) && !event.target.matches('.filter')) {
+            offcanvasInstance.hide(); // Закрыть оффканвас
+        }
+    });
+
+</script>
+
+<div id="alert-container" class="mt-3"></div>
+
+<script>
+    function LoadFilters() {
+        $.ajax({
+            url: '/AccountingCon/GetGroupByNameGroupAsync',
+            type: 'GET',
+            success: function (response) {
+                var checkboxHtml = "";
+                response.forEach(function (nameGroup) {
+                    checkboxHtml += `
+                            <div class="form-check">
+                                <input class="form-check-input group-checkbox" type="checkbox" name="FilterData.Groups" value="${nameGroup}" id="filter_${nameGroup}">
+                                <label class="form-check-label" for="filter_${nameGroup}">
+                                    ${nameGroup}
+                                </label>
+                            </div>`;
+                });
+                document.getElementById('filterContainer').innerHTML = checkboxHtml;
+            },
+            error: function (xhr, status, error) {
+                console.error("Ошибка: " + status + " - " + error);
+            }
+        });
+    }
+
+    function collectGroups() {
+        var selectedGroups = [];
+
+        document.querySelectorAll('.group-checkbox:checked').forEach(function (checkbox) {
+            selectedGroups.push(checkbox.value);
+        });
+
+        document.getElementById('groupInput').value = JSON.stringify(selectedGroups);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var toggleRangeCheckbox = document.getElementById('toggle-range');
+        var endDateContainer = document.getElementById('end-date-container');
+
+        toggleRangeCheckbox.addEventListener('click', function () {
+            if (toggleRangeCheckbox.checked) {
+                endDateContainer.style.display = 'block';
+            } else {
+                endDateContainer.style.display = 'none';
+                document.getElementById('end-date').value = '';
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const textareas = document.querySelectorAll('textarea.auto-resize');
+
+        textareas.forEach(textarea => {
+            const adjustHeight = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            };
+
+            adjustHeight(textarea);
+
+            textarea.addEventListener('input', () => adjustHeight(textarea));
+        });
+    });
+</script>
+
+<script>
+    function DeleteDocument(buttonId) {
+        var button = document.getElementById(buttonId);
+        var select = button.closest('td').querySelector('select');
+        var filePath = select.value;
+
+        if (filePath) {
+            fetch(`/LoadPDFController/DeleteDocument?filePath=${encodeURIComponent(filePath)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        throw new Error('Помилка під час видалення файлу.');
+                    }
+                })
+                .then(result => {
+                    showAlert(result, 'success');
+                })
+                .catch(error => {
+                    showAlert(error.message, 'danger');
+                });
+        } else {
+            showAlert('Будь ласка, виберіть файл для видалення.', 'warning');
+        }
+    }
+
+    function openDocument(buttonId) {
+        var button = document.getElementById(buttonId);
+        var select = button.closest('td').querySelector('select');
+        var filePath = select.value;
+
+        if (filePath) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', `/LoadPDFController/GetDocument?filePath=${encodeURIComponent(filePath)}`, true);
+
+            xhr.responseType = 'blob';
+
+            xhr.onload = function (e) {
+                if (this.status === 200) {
+                    var blob = new Blob([this.response], { type: 'application/pdf' });
+                    var url = URL.createObjectURL(blob);
+                    window.open(url);
+                } else {
+                    console.error('Помилка під час завантаження PDF:', this.status);
+                }
+            };
+
+            xhr.onerror = function () {
+                console.error('Помилка мережі під час завантаження PDF');
+            };
+
+            xhr.send();
+        } else {
+            alert('Будь ласка, виберіть файл для відкриття.');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alertHTML = `
+                        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = alertHTML;
+
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+                setTimeout(() => alert.remove(), 300);
+            }
+        }, 5000);
+    }
+</script>
+
+
+
+<script>
+    function loadPDFFiles(button) {
+        var index = $(button).data('index');
+        var fileInput = document.getElementById('fileUpload-' + index);
+        var files = fileInput.files;
+        var formData = new FormData();
+
+        if (files.length === 0) {
+            alert("No files selected.");
+            return;
+        }
+
+        Array.from(files).forEach(file => {
+            formData.append('files', file);
+        });
+
+        formData.append('numberGroup', $('#numberGroup-' + index).val());
+        formData.append('ohronnaComp', $('textarea[name="D5[' + index + '].OhronnaComp"]').val());
+        formData.append('NumDog', $('textarea[name="D5[' + index + '].NumDog"]').val());
+        formData.append('NameGroup', $('textarea[name="D5[' + index + '].NameGroup"]').val());
+        formData.append('NumDog2', $('textarea[name="D5[' + index + '].NumDog2"]').val());
+
+        // Получаем значение StrokDii
+        var strokDiiValue = $('input[name="D5[' + index + '].StrokDii"]').val();
+        console.log('StrokDii value:', strokDiiValue); // Логирование значения
+        if (strokDiiValue) {
+            formData.append('StrokDii', strokDiiValue);
+        } else {
+            console.warn('StrokDii value is undefined or empty.');
+        }
+
+        var strokDiiValue = $('input[name="D5[' + index + '].StrokDii2"]').val();
+        console.log('StrokDii2 value:', strokDiiValue); // Логирование значения
+        if (strokDiiValue) {
+            formData.append('StrokDii2', strokDiiValue);
+        } else {
+            console.warn('StrokDii value is undefined or empty.');
+        }
+
+        formData.append('ResPerson', $('textarea[name="D5[' + index + '].ResPerson"]').val());
+        formData.append('Phone', $('textarea[name="D5[' + index + '].Phone"]').val());
+        formData.append('address', $('#address-' + index).val());
+
+
+        $.ajax({
+            url: '/SaveFilesOnServer/UploadFile',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.status) {
+                    alert(response.message);
+                    window.location.href = '/Guard';
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log("AJAX error: ", textStatus, " : ", errorThrown);
+                alert('An error occurred: ' + textStatus);
+            }
+        });
+    }
+
+</script>

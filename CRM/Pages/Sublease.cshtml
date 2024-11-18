@@ -1,0 +1,865 @@
+﻿@page "{handler?}"
+@model SRMAgreement.Pages.SubleaseModel
+@{
+    ViewData["Title"] = "Суборенда";
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = User.Identity.Name;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isRW = User.IsInRole("RW");
+    var isUser = User.IsInRole("User");
+    var isQW = User.IsInRole("QW");
+    var isBUH = User.IsInRole("BUH");
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="~/css/Sublease.css" asp-append-version="true"/>
+
+<form method="post">
+    <input class="search" asp-for="SearchQuery" />
+    <button type="submit" name="action" value="Search" class="btn btn-search">Пошук</button>
+</form>
+
+<form id="dataForm" method="post">
+    <div class="sticky-header">
+        <div class="container">
+            <nav>
+                <ul>
+                    <button id="addRowForm" type="submit" name="action" value="AddNewRow" class="btn btn-primary add-row" @(isQW || isUser || isBUH ? "disabled" : "")>Додати рядок</button>
+                    <button id="saveForm" type="submit" name="action" value="SaveChangesWithNewRows" class="btn btn-primary save-row" @(isQW || isUser || isBUH ? "disabled" : "")>Зберегти</button>
+                </ul>
+            </nav>
+            <div class="pagination-buttons">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        title="Мінімум: @(Model.PageRanges.ContainsKey(Model.CurrentPage - 1) ? Model.PageRanges[Model.CurrentPage - 1].MinNumberGroup.ToString() : "N/A"), Максимум: @(Model.PageRanges.ContainsKey(Model.CurrentPage - 1) ? Model.PageRanges[Model.CurrentPage - 1].MaxNumberGroup.ToString() : "N/A")">
+                        <a class="page-link" href="?CurrentPage=@(Model.CurrentPage - 1)" tabindex="-1" aria-disabled="@(Model.CurrentPage == 1 ? "true" : "false")">
+                            <span aria-hidden="true">&laquo;</span> Попередня
+                        </a>
+                    </li>
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")"
+                            data-bs-toggle="tooltip" data-bs-placement="bottom"
+                            title="Мінімум: @(Model.PageRanges.ContainsKey(i) ? Model.PageRanges[i].MinNumberGroup.ToString() : "N/A"), Максимум: @(Model.PageRanges.ContainsKey(i) ? Model.PageRanges[i].MaxNumberGroup.ToString() : "N/A")">
+                            <a class="page-link" href="?CurrentPage=@i">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        title="Мінімум: @(Model.PageRanges.ContainsKey(Model.CurrentPage + 1) ? Model.PageRanges[Model.CurrentPage + 1].MinNumberGroup.ToString() : "N/A"), Максимум: @(Model.PageRanges.ContainsKey(Model.CurrentPage + 1) ? Model.PageRanges[Model.CurrentPage + 1].MaxNumberGroup.ToString() : "N/A")">
+                        <a class="page-link" href="?CurrentPage=@(Model.CurrentPage + 1)">
+                            Наступна <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container main-content">
+    <table id="counterpartyTable" class="table table-bordered table-responsive">
+        <thead>
+            <tr>
+                    <th class ="resizable-column NumberGroup">Номер</th>
+                    <th class="resizable-column NameGroup">Найменування</th>
+                    <th class="resizable-column Address">Адреса</th>
+                    <th class="resizable-column DogovirSuborendu">Договір суборенди</th>
+                    <th class="resizable-column DateTime">Дата укладання</th>
+                    <th class="resizable-column AktDate">Акт дата</th>
+                    <th class="resizable-column Suma">Сума</th>
+                    <th class="resizable-column AktDate">Термін дії договору</th>
+                    <th class="resizable-column Schablon">Шаблон</th>
+            </tr>
+        </thead>
+            <tbody>
+                @for (var i = 0; i < Model.D4.Count; i++)
+                {
+                    <tr class="@(Model.D2NumberGroup.Contains(Model.D4[i].NumberGroup) ? "bg-d" : "")">
+                        <td class="NumberGroup">
+                          
+                            @if (Model.NumberGroupValues != null && Model.NumberGroupValues.Any())
+                            {
+                                <select id="NumberGroup-@i" class="form-control NumberGroup" name="D4[@i].NumberGroup" @(isQW || isUser || isBUH ? "disabled" : "")>
+                                    <option value=""> ---- </option>
+                                    @foreach (var item in Model.NumberGroupValues)
+                                    {
+                                        if (item == Model.D4[i].NumberGroup)
+                                        {
+                                            <option value="@item" selected>@item</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item">@item</option>
+                                        }
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <p>No Number Group Values found.</p>
+                            }
+                        </td>
+                        <td class="NameGroup">
+                            <textarea readonly id="NameGroup-@i" class="form-control auto-resize " name="D4[@i].NameGroup" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D4[i].NameGroup</textarea>
+                        </td>
+                        <td class="address">
+                            <textarea readonly id="address-@i" class="form-control auto-resize " name="D4[@i].address" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D4[i].address</textarea>
+                        </td>
+                        <td class="DogovirSuborendu">
+                            <textarea id="DogovirSuborendu-@i" class="form-control DogovirSuborendu" name="D4[@i].DogovirSuborendu" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D4[i].DogovirSuborendu</textarea>
+                        </td>
+                        <td class="DateTime">
+                            <textarea id="DateTime-@i" class="form-control DateTime" name="D4[@i].DateTime" @(isQW || isUser || isBUH ? "readonly" : "")>@((Model.D4[i].DateTime != DateTime.MinValue) ? Model.D4[i].DateTime.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td class="AktDate">
+                            <div class="flex-container">
+                                <textarea id="AktDate-@i" class="form-control auto-resize " name="D4[@i].AktDate" @(isQW || isUser || isBUH ? "readonly" : "") placeholder="дос. пов.">@((Model.D4[i].AktDate != DateTime.MinValue) ? Model.D4[i].AktDate.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                            </div>
+                        </td>
+                        <td class="Suma">
+                            <textarea id="Suma-@i" class="form-control auto-resize " name="D4[@i].Suma" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D4[i].Suma</textarea>
+                            <textarea id="Suma2-@i" class="form-control auto-resize " name="D4[@i].Suma2" @(isQW || isUser || isBUH ? "readonly" : "")>@Model.D4[i].Suma2</textarea>
+                        </td>
+                        <td class="AktDate">
+                            <textarea id="EndAktDate-@i" class="form-control AktDate" name="D4[@i].EndAktDate" @(isQW || isUser || isBUH ? "readonly" : "")>@((Model.D4[i].EndAktDate != DateTime.MinValue) ? Model.D4[i].EndAktDate.ToString("dd/MM/yyyy") : string.Empty)</textarea>
+                        </td>
+                        <td class="Schablon">
+                            <button type="button" id="@Model.D4[@i].Id" onclick="getFiles('@Model.D4[@i].Id')" @(isQW || isUser || isBUH ? "disabled" : "")
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#exampleModal"
+                                    data-row-index="@i"
+                                    data-number-group="@Model.D4[i].NumberGroup"
+                                    data-name-group="@Model.D4[i].NameGroup"
+                                    data-address="@Model.D4[i].address"
+                                    data-dogovir-suborendu="@Model.D4[i].DogovirSuborendu"
+                                    data-date-time="@Model.D4[i].DateTime.ToString("dd/MM/yyyy")"
+                                    data-suma="@Model.D4[i].Suma"
+                                    data-akt-date="@Model.D4[i].AktDate.ToString("dd/MM/yyyy")"
+                                    data-id="@Model.D4[i].Id">
+                                Functions
+                            </button>
+                            <input type="hidden" name="rowIndex" value="@i" />
+                        </td>
+                        <input id="Id-@i" type="hidden" name="D4[@i].Id" value="@Model.D4[i].Id" />
+                    </tr>
+                   
+                }
+            </tbody>
+    </table>
+    </div>
+</form>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <span type="hidden">Row Index:</span>  <span type="hidden" id="rowIndex"></span><br>
+                    Номер: <span id="modalNumberGroup"></span><br>
+                    Найменування: <span id="modalNameGroup"></span><br>
+                    Id: <span id="modalBodyId"></span><br>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="mb-3 form-control-file">
+                        <input class="form-control" type="file" id="fileUpload" multiple @(isQW || isUser || isBUH ? "disabled" : "")>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="loadPDFFiles(this)" @(isQW || isUser || isBUH ? "disabled" : "")>Завантажити</button>
+                    <button type="button" class="btn btn-info btn-primary" onclick="openDocument('openBtn')" @(isQW || isUser || isBUH ? "disabled" : "")>Відкрити файл</button>
+                </div>
+                <hr>
+                <select id="fileSelect" class="form-select" @(isQW || isUser || isBUH ? "disabled" : "")>
+                    <option value="">Виберіть файл</option>
+                </select>
+                <button type="button" id="openBtn" class="btn btn-info btn-primary OpenFile" onclick="openDocument('openBtn')" @(isQW || isUser || isBUH ? "disabled" : "")>Відкрити файл</button>
+                <button type="button" id="deleteBtn" class="btn btn-danger btn-primary DeleteFile" onclick="DeleteDocument('deleteBtn')" @(isQW || isUser || isBUH ? "disabled" : "")>Видалити</button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary generate-word-btn" data-rowindex="">Договір+Акт</button>
+                <button type="button" class="btn btn-primary prup-word-btn" data-rowindex="">Припинення</button>
+                <button type="button" class="btn btn-primary pov-word-btn" data-rowindex="">Повернення</button>
+                <input type="hidden" id="modalBodyId" name="Id" />
+                <input type="hidden" id="hiddenRowIndex" name="rowIndex" value="" />
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" name="action" value="AddToArchive" class="btn btn-primary add-to-archive">Перенести в архів</button>
+                <button type="button" class="btn btn-primary del-word-btn" data-rowindex="">Видалити</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="alert-container" class="mt-3"></div>
+
+<script>
+
+</script>
+
+<script>
+    function getFiles(id) {
+        const fileSelect = document.getElementById('fileSelect');
+        fileSelect.innerHTML = '<option value="">Виберіть файл</option>';
+
+        fetch(`LoadPDFController/GetFilesById?id=${id}`)
+            .then(response => response.json())
+            .then(files => {
+                files.forEach(file => {
+                    const option = document.createElement('option');
+
+                    let fileName = file.PhysicalPath.replace(/\\/g, '/').split('/').pop(); 
+                    console.log(fileName)
+                    option.value = file.PhysicalPath;
+                    option.textContent = fileName;
+                    fileSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Ошибка при получении файлов:', error);
+            });
+    }
+
+</script>
+
+<script>
+    function DeleteDocument(buttonId) {
+        var button = document.getElementById(buttonId);
+        var select = document.getElementById('fileSelect');
+        var filePath = select.value;
+
+        if (filePath) {
+            console.log(`Удаление файла: ${filePath}`);
+
+            fetch(`/LoadPDFController/DeleteDocumentSublease?filePath=${encodeURIComponent(filePath)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        throw new Error('Помилка під час видалення файлу.');
+                    }
+                })
+                .then(result => {
+                    console.log('Ответ сервера:', result);
+                    showAlert(result, 'success');
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showAlert(error.message, 'danger');
+                });
+        } else {
+            showAlert('Будь ласка, виберіть файл для видалення.', 'warning');
+        }
+    }
+
+    function openDocument(buttonId) {
+        var button = document.getElementById(buttonId);
+        if (!button) {
+            alert("Кнопка не найдена.");
+            return;
+        }
+
+        var select = document.getElementById('fileSelect');
+
+        if (!select) {
+            alert("Выбор файла не найден.");
+            return;
+        }
+
+        var filePath = select.value;
+        if (filePath) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', `/LoadPDFController/GetDocument?filePath=${encodeURIComponent(filePath)}`, true);
+
+            xhr.responseType = 'blob';
+
+            xhr.onload = function (e) {
+                if (this.status === 200) {
+                    var blob = new Blob([this.response], { type: 'application/pdf' });
+                    var url = URL.createObjectURL(blob);
+                    window.open(url);
+                } else {
+                    console.error('Ошибка при загрузке PDF:', this.status);
+                }
+            };
+
+            xhr.onerror = function () {
+                console.error('Ошибка сети при загрузке PDF');
+            };
+
+            xhr.send();
+        } else {
+            alert('Пожалуйста, выберите файл для открытия.');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alertHTML = `
+                        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = alertHTML;
+
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+                setTimeout(() => alert.remove(), 300);
+            }
+        }, 5000);
+    }
+</script>
+
+
+
+<script>
+    function loadPDFFiles(button) {
+    var index = $(button).data('index');
+    var fileInput = document.getElementById('fileUpload');
+    if (!fileInput) {
+        alert("Не найден элемент с ID fileUpload-" + index);
+        return;
+    }
+
+    var files = fileInput.files;
+    var formData = new FormData();
+
+    if (files.length === 0) {
+        alert("Нет выбранных файлов.");
+        return;
+    }
+
+    Array.from(files).forEach(file => {
+        formData.append('files', file);
+    });
+
+    var numberGroupInput = document.getElementById('modalNumberGroup');
+    if (numberGroupInput) {
+        formData.append('numberGroup', numberGroupInput.textContent.trim());
+    } else {
+        alert("Не найден элемент modalNumberGroup");
+        return;
+    }
+    console.log(formData.get('numberGroup'));
+    console.log(fileInput);
+
+    $.ajax({
+        url: '/SaveFilesOnServer/UploadOnlyFile',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (response) {
+            if (response.status) {
+                alert(response.message);
+            } else {
+                alert('Ошибка: ' + response.message);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log("AJAX ошибка: ", textStatus, " : ", errorThrown);
+            alert('Произошла ошибка: ' + textStatus);
+        }
+    });
+}
+
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var saveButton = document.getElementById('saveForm');
+
+        saveButton.addEventListener('click', function (event) {
+            var form = document.getElementById('dataForm');
+            var isEmpty = false;
+
+            for (let i = 0; i < form.elements.length; i++) {
+                let element = form.elements[i];
+                let elementName = element.name || "";
+
+                if (
+                    elementName.includes(".NumberGroup") ||
+                    elementName.includes(".NameGroup") ||
+                    elementName.includes(".address") ||
+                    elementName.includes(".DogovirSuborendu") ||
+                    elementName.includes(".DateTime") ||
+                    (elementName.includes(".Suma") && !elementName.includes(".Suma2"))
+                ) {
+                    if (!element.value.trim()) {
+                        isEmpty = true;
+                        element.classList.add("is-invalid");
+                    } else {
+                        element.classList.remove("is-invalid");
+                    }
+                }
+            }
+
+            if (isEmpty) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const exampleModal = document.getElementById('exampleModal');
+
+        exampleModal.addEventListener('show.bs.modal', (event) => {
+            const button = event.relatedTarget;
+            const rowIndex = button.getAttribute('data-row-index');
+            const numberGroup = button.getAttribute('data-number-group');
+            const nameGroup = button.getAttribute('data-name-group');
+            const id = button.getAttribute('data-id');
+
+            const modalBodyRowIndex = exampleModal.querySelector('#rowIndex');
+            const modalBodyNumberGroup = exampleModal.querySelector('#modalNumberGroup');
+            const modalBodyNameGroup = exampleModal.querySelector('#modalNameGroup');
+            const modalBodyId = exampleModal.querySelector('#modalBodyId');
+
+            modalBodyRowIndex.textContent = rowIndex;
+            modalBodyNumberGroup.textContent = numberGroup;
+            modalBodyNameGroup.textContent = nameGroup;
+            modalBodyId.textContent = id;
+        });
+    });
+</script>
+
+<script>
+
+    function showAlert(message, type) {
+        const alertHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = alertHTML; // Вставляем HTML уведомления в контейнер
+
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+                setTimeout(() => alert.remove(), 300);
+            }
+        }, 5000); // Удалить сообщение через 5 секунд
+    }
+
+    $(document).ready(function () {
+        $('[data-bs-toggle="modal"]').click(function () {
+            var rowIndex = $(this).data('row-index');
+            $('#rowIndexDisplay').text(rowIndex);
+            $('.generate-word-btn, .prup-word-btn, .pov-word-btn, .add-to-archive, .del-word-btn').data('rowindex', rowIndex);
+        });
+
+        $('.generate-word-btn').click(function () {
+            var rowIndex = $(this).data('rowindex');
+
+            var numberGroup = $('#NumberGroup-' + rowIndex).val();
+            var nameGroup = $('#NameGroup-' + rowIndex).val();
+            var address = $('#address-' + rowIndex).val();
+            var dogovirSuborendu = $('#DogovirSuborendu-' + rowIndex).val();
+            var dateTime = $('#DateTime-' + rowIndex).val();
+            var strokDii = $('#StrokDii-' + rowIndex).val();
+            var suma = $('#Suma-' + rowIndex).val();
+            var suma2 = $('#Suma2-' + rowIndex).val();
+            var aktDate = $('#AktDate-' + rowIndex).val();
+            var stan = $('#Stan-' + rowIndex).val();
+            var prumitka = $('#Prumitka-' + rowIndex).val();
+            var endAktDate = $('#EndAktDate-' + rowIndex).val();
+
+            console.log("Данные для строки " + rowIndex + ":");
+            console.log("NumberGroup: " + numberGroup);
+            console.log("NameGroup: " + nameGroup);
+            console.log("Address: " + address);
+            console.log("DogovirSuborendu: " + dogovirSuborendu);
+            console.log("DateTime: " + dateTime);
+            console.log("StrokDii: " + strokDii);
+            console.log("Suma: " + suma);
+            console.log("Suma2: " + suma2);
+            console.log("AktDate: " + aktDate);
+            console.log("Stan: " + stan);
+            console.log("Prumitka: " + prumitka);
+            console.log("EndAktDate: " + endAktDate);
+
+            var data = {
+                Suma: suma,
+                Suma2: suma2,
+                DateTime: dateTime,
+                DogovirSuborendu: dogovirSuborendu,
+                NumberGroup: numberGroup,
+                NameGroup: nameGroup, 
+                EndAktDate: endAktDate,
+                aktDate: aktDate
+            };
+
+            $.ajax({
+                url: '/word/OnPostGenerateWordAsync',
+                type: 'POST',
+                data: data,  // Передаем данные как обычный объект
+                success: function (response) {
+                    if (response.error) {
+                        showAlert(response.error, 'danger');  // Показать сообщение об ошибке
+                    } else if (response.success) {
+                        showAlert(response.success, 'success');  // Показать сообщение об успехе
+                    } else {
+                        showAlert('Неизвестный ответ от сервера.', 'warning'); // Обработка неожиданных ответов
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Проверяем, есть ли тело ответа от сервера
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                        showAlert(jqXHR.responseJSON.error, 'danger');  // Отобразить сообщение об ошибке от сервера
+                    } else {
+                        showAlert('Ошибка AJAX: ' + textStatus + ' : ' + errorThrown, 'danger');
+                    }
+                }
+            });
+        });
+
+        $('.prup-word-btn').click(function () {
+            var rowIndex = $(this).data('rowindex');
+
+            var numberGroup = $('#NumberGroup-' + rowIndex).val();
+            var nameGroup = $('#NameGroup-' + rowIndex).val();
+            var address = $('#address-' + rowIndex).val();
+            var dogovirSuborendu = $('#DogovirSuborendu-' + rowIndex).val();
+            var dateTime = $('#DateTime-' + rowIndex).val();
+            var strokDii = $('#StrokDii-' + rowIndex).val();
+            var suma = $('#Suma-' + rowIndex).val();
+            var suma2 = $('#Suma2-' + rowIndex).val();
+            var aktDate = $('#AktDate-' + rowIndex).val();
+            var stan = $('#Stan-' + rowIndex).val();
+            var prumitka = $('#Prumitka-' + rowIndex).val();
+            var endAktDate = $('#EndAktDate-' + rowIndex).val();
+
+            console.log("Данные для строки " + rowIndex + ":");
+            console.log("NumberGroup: " + numberGroup);
+            console.log("NameGroup: " + nameGroup);
+            console.log("Address: " + address);
+            console.log("DogovirSuborendu: " + dogovirSuborendu);
+            console.log("DateTime: " + dateTime);
+            console.log("StrokDii: " + strokDii);
+            console.log("Suma: " + suma);
+            console.log("Suma2: " + suma2);
+            console.log("AktDate: " + aktDate);
+            console.log("Stan: " + stan);
+            console.log("Prumitka: " + prumitka);
+            console.log("EndAktDate: " + endAktDate);
+
+            var data = {
+                Suma: suma,
+                Suma2: suma2,
+                DateTime: dateTime,
+                DogovirSuborendu: dogovirSuborendu,
+                NumberGroup: numberGroup,
+                NameGroup: nameGroup,
+                EndAktDate: endAktDate,
+                aktDate: aktDate
+            };
+
+            $.ajax({
+                url: '/word/OnPostGenerateWordAsyncPrup',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response.error) {
+                        showAlert(response.error, 'danger');  // Показать сообщение об ошибке
+                    } else if (response.success) {
+                        showAlert(response.success, 'success');  // Показать сообщение об успехе
+                    } else {
+                        showAlert('Неизвестный ответ от сервера.', 'warning'); // Обработка неожиданных ответов
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Проверяем, есть ли тело ответа от сервера
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                        showAlert(jqXHR.responseJSON.error, 'danger');  // Отобразить сообщение об ошибке от сервера
+                    } else {
+                        showAlert('Ошибка AJAX: ' + textStatus + ' : ' + errorThrown, 'danger');
+                    }
+                }
+            });
+
+        });
+
+        $('.pov-word-btn').click(function () {
+            var rowIndex = $(this).data('rowindex');
+
+            var numberGroup = $('#NumberGroup-' + rowIndex).val();
+            var nameGroup = $('#NameGroup-' + rowIndex).val();
+            var address = $('#address-' + rowIndex).val();
+            var dogovirSuborendu = $('#DogovirSuborendu-' + rowIndex).val();
+            var dateTime = $('#DateTime-' + rowIndex).val();
+            var strokDii = $('#StrokDii-' + rowIndex).val();
+            var suma = $('#Suma-' + rowIndex).val();
+            var suma2 = $('#Suma2-' + rowIndex).val();
+            var aktDate = $('#AktDate-' + rowIndex).val();
+            var stan = $('#Stan-' + rowIndex).val();
+            var prumitka = $('#Prumitka-' + rowIndex).val();
+            var endAktDate = $('#EndAktDate-' + rowIndex).val();
+            var aktDateObj = new Date(aktDate.split('.').reverse().join('-'));
+
+            console.log("Данные для строки " + rowIndex + ":");
+            console.log("NumberGroup: " + numberGroup);
+            console.log("NameGroup: " + nameGroup);
+            console.log("Address: " + address);
+            console.log("DogovirSuborendu: " + dogovirSuborendu);
+            console.log("DateTime: " + dateTime);
+            console.log("StrokDii: " + strokDii);
+            console.log("Suma: " + suma);
+             console.log("Suma2: " + suma2);
+            console.log("AktDate: " + aktDate);
+            console.log("Stan: " + stan);
+            console.log("Prumitka: " + prumitka);
+            console.log("EndAktDate: " + endAktDate);
+
+            var data = {
+                Suma: suma,
+                Suma2: suma2,
+                DateTime: dateTime,
+                DogovirSuborendu: dogovirSuborendu,
+                NumberGroup: numberGroup,
+                NameGroup: nameGroup,
+                EndAktDate: endAktDate,
+                aktDate: aktDate
+            };
+
+            $.ajax({
+                url: '/word/OnPostGenerateWordAsyncPov',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response.error) {
+                        showAlert(response.error, 'danger');  // Показать сообщение об ошибке
+                    } else if (response.success) {
+                        showAlert(response.success, 'success');  // Показать сообщение об успехе
+                    } else {
+                        showAlert('Неизвестный ответ от сервера.', 'warning'); // Обработка неожиданных ответов
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Проверяем, есть ли тело ответа от сервера
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                        showAlert(jqXHR.responseJSON.error, 'danger');  // Отобразить сообщение об ошибке от сервера
+                    } else {
+                        showAlert('Ошибка AJAX: ' + textStatus + ' : ' + errorThrown, 'danger');
+                    }
+                }
+            });
+        });
+
+        $('.add-to-archive').click(function () {
+            var id = $('#modalBodyId').text();
+            var data = {
+                Id: id
+            };
+
+            $.ajax({
+                url: '/archive/AddToArchive',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    console.log('Запись успешно перенесена в архив.');
+                    window.location.href = "/Sublease"
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Ошибка AJAX запроса: ' + textStatus, errorThrown);
+                    alert('Ошибка при переносе записи в архив.');
+                }
+            });
+        });
+
+        $('.del-word-btn').click(function () {
+            var id = $('#modalBodyId').text();
+            var data = {
+                Id: id
+            };
+
+            $.ajax({
+                url: '/D4/DeleteById',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    console.log('Запись успешно deleted.');
+                    window.location.href = "/Sublease"
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Ошибка AJAX запроса: ' + textStatus, errorThrown);
+                    alert('Del Erorr.');
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('[id^=NumberGroup-]').change(function () {
+            var selectedValue = $(this).val();
+            console.log("Dropdown1 selected value: " + selectedValue);
+            var index = $(this).attr('id').split('-')[1];
+            $.ajax({
+                url: '/_2D/GetDataFromDBNumGroup',
+                type: 'GET',
+                data: { num: selectedValue },
+                success: function (data) {
+                    console.log("Data from GetDataFromDBNumGroup: ", data);
+                    var textarea = $('#NameGroup-' + index);
+                    textarea.val('');
+                    $.each(data, function (index, value) {
+                        textarea.val(textarea.val() + value);
+                    });
+                },
+                error: function () {
+                    alert('Error loading data for textarea');
+                }
+            });
+        });
+    });
+    $(document).ready(function () {
+        $('[id^=NumberGroup-]').change(function () {
+            var selectedValue = $(this).val();
+            console.log("Dropdown1 selected value: " + selectedValue);
+            var index = $(this).attr('id').split('-')[1];
+            $.ajax({
+                url: '/_2D/GetAdditionalData',
+                type: 'GET',
+                data: { num: selectedValue },
+                success: function (data) {
+                    console.log("Data from GetAdditionalData: ", data);
+                    var textarea = $('#address-' + index);
+                    textarea.val('');
+                    $.each(data, function (index, value) {
+                        textarea.val(textarea.val() + value);
+                    });
+                },
+                error: function () {
+                    alert('Error loading additional data for textarea');
+                }
+            });
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const textareas = document.querySelectorAll('textarea.auto-resize');
+
+        textareas.forEach(textarea => {
+            const adjustHeight = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            };
+
+            adjustHeight(textarea);
+
+            textarea.addEventListener('input', () => adjustHeight(textarea));
+        });
+    });
+</script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var selects = document.querySelectorAll('.form-control.NumberGroup');
+        selects.forEach(function (select) {
+            select.addEventListener('change', function () {
+                var selectedValue = select.value;
+                if (selectedValue <= 9) {
+                    selectedValue = "0" + selectedValue;
+                } else {
+                    selectedValue = select.value;
+                }
+                if (selectedValue !== "-----") {
+                    console.log("Выбранное значение:", selectedValue);
+                    var dateInput = document.querySelector('.form-control.DateTime');
+                    var enteredDateStr = dateInput.value;
+                    var parts = enteredDateStr.split('.');
+                    if (parts.length !== 3) {
+                        console.error("Неверный формат даты:", enteredDateStr);
+                        return;
+                    }
+
+                    var day = parseInt(parts[0], 10);
+                    var month = parseInt(parts[1], 10) - 1;
+                    var year = parseInt(parts[2], 10);
+
+                    var enteredDate = new Date(year, month, day);
+                    console.log("enteredDate", enteredDate);
+
+                    var formattedMonth = ('0' + (month + 1)).slice(-2);
+
+                    year = enteredDate.getFullYear();
+                    console.log("formattedMonth", formattedMonth, "year", year);
+
+                    var dogovirSuborendu = document.querySelector('.form-control.DogovirSuborendu');
+
+                    dogovirSuborendu.textContent = selectedValue + '/' + formattedMonth + '/' + year;
+                }
+
+            });
+        });
+
+        var dateInput = document.querySelector('.form-control.DateTime');
+        dateInput.addEventListener('change', function () {
+            var selectedValue = document.querySelector('.form-control.NumberGroup').value;
+
+            var enteredDateStr = dateInput.value;
+
+            var parts = enteredDateStr.split('.');
+            if (parts.length !== 3) {
+                console.error("Неверный формат даты:", enteredDateStr);
+                return;
+            }
+
+            var day = parseInt(parts[0], 10);
+            var month = parseInt(parts[1], 10) - 1;
+            var year = parseInt(parts[2], 10);
+
+            var enteredDate = new Date(year, month, day);
+            console.log("enteredDate", enteredDate);
+            var formattedMonth = ('0' + (month + 1)).slice(-2);
+
+            year = enteredDate.getFullYear();
+            console.log("formattedMonth", formattedMonth, "year", year);
+
+            var dogovirSuborendu = document.querySelector('.form-control.DogovirSuborendu');
+            if (selectedValue <= 9) {
+                dogovirSuborendu.textContent = '0' + selectedValue + '/' + formattedMonth + '/' + year;
+            } else {
+                dogovirSuborendu.textContent = selectedValue + '/' + formattedMonth + '/' + year;
+            }
+
+        });
+    });
+    </script>

@@ -1,0 +1,16 @@
+﻿<style >
+.resizable-column {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+table.table {
+    table-layout: auto;
+    width: 100%;
+}
+
+    table.table th, table.table td {
+        word-wrap: break-word;
+    }
+
+</style >
