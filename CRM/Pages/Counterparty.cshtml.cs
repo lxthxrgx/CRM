@@ -102,6 +102,32 @@ namespace SRMAgreement.Pages
             }
             return char.ToUpper(input[0]) + input.Substring(1).ToLower();
         }
+        public string ToUpperAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return char.ToUpper(input[0]) + input.Substring(1);
+        }
+
+        public string ToUpperAllLaters(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToUpper();
+        }
+
+        public string ToLowerAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToLower();
+        }
 
         public async Task<IActionResult> OnPostSearchAsync()
         {
@@ -117,7 +143,7 @@ namespace SRMAgreement.Pages
                .ToList();
             string searchQueryLower = ToUpperFirstLetter(SearchQuery);
             D1 = await _context.D1
-                .Where(e => e.NameGroup.ToString().Contains(searchQueryLower) ||
+                .Where(e => e.NameGroup.Contains(searchQueryLower) || e.NameGroup == ToUpperAll(SearchQuery) || e.NameGroup == ToLowerAll(SearchQuery) || e.NameGroup == ToUpperAllLaters(SearchQuery) ||
                             e.Fullname.Contains(searchQueryLower) ||
                             e.rnokpp.ToString().Contains(SearchQuery) ||
                             e.address.Contains(searchQueryLower) ||

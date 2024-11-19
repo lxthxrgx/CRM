@@ -24,8 +24,9 @@ namespace SRMAgreement.Data_Base
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options)
         {
-            
+
         }
+        public DataBaseContext(){}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<_2D>()

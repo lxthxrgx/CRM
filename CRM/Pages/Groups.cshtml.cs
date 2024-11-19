@@ -98,17 +98,33 @@ namespace SRMAgreement.Pages
             }
             return char.ToUpper(input[0]) + input.Substring(1).ToLower();
         }
-
-        public string ToUpperAll(string data)
+        public string ToUpperAll(string input)
         {
-            if (string.IsNullOrEmpty(data))
+            if (string.IsNullOrEmpty(input))
             {
-                return data;
+                return input;
             }
-            Console.WriteLine(data.ToUpper());
-            return data.ToUpper();
-
+            return char.ToUpper(input[0]) + input.Substring(1);
         }
+
+        public string ToUpperAllLaters(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToUpper();
+        }
+
+        public string ToLowerAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToLower();
+        }
+
         public async Task<IActionResult> OnPostSearchAsync()
         {
             if (string.IsNullOrEmpty(SearchQuery))
@@ -120,7 +136,7 @@ namespace SRMAgreement.Pages
             D2 = await _context.D2
                 .Where(e =>
                     e.NumberGroup.ToString().Contains(SearchQuery) ||
-                    e.NameGroup.Contains(searchQueryLower) || e.PIBS.Contains(SearchQuery) || e.NameGroup.Contains(ToUpperAll(SearchQuery)) ||
+                    e.NameGroup.Contains(searchQueryLower) || e.NameGroup == ToUpperAll(SearchQuery) || e.NameGroup == ToLowerAll(SearchQuery) || e.NameGroup == ToUpperAllLaters(SearchQuery) ||
                     e.PIBS.Contains(searchQueryLower) || e.PIBS.Contains(SearchQuery) || e.PIBS.Contains(ToUpperAll(SearchQuery)) ||
                     e.address.Contains(searchQueryLower) || e.address.Contains(SearchQuery) || e.address.Contains(ToUpperAll(SearchQuery)) ||
                     e.area.ToString().Contains(SearchQuery)

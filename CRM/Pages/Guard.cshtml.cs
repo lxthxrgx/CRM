@@ -133,7 +133,40 @@ namespace SRMAgreement.Pages
             return Page();
         }
 
+        public string ToUpperFirstLetter(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return char.ToUpper(input[0]) + input.Substring(1).ToLower();
+        }
+        public string ToUpperAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return char.ToUpper(input[0]) + input.Substring(1);
+        }
 
+        public string ToUpperAllLaters(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToUpper();
+        }
+
+        public string ToLowerAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToLower();
+        }
 
         private async Task<IActionResult> OnPostSearchAsync()
         {
@@ -146,9 +179,10 @@ namespace SRMAgreement.Pages
             status = await _context.status.ToListAsync();
             DataFromDB = await _context.D2.ToListAsync();
             NumberGroupValues = _context.D2.Select(d => d.NumberGroup).ToList();
-
+            string searchQueryLower = ToUpperFirstLetter(SearchQuery);
             D5 = await _context.D5
                 .Where(e => e.NumberGroup.ToString() == SearchQuery ||
+                 e.NameGroup.Contains(searchQueryLower) || e.NameGroup == ToUpperAll(SearchQuery) || e.NameGroup == ToLowerAll(SearchQuery) || e.NameGroup == ToUpperAllLaters(SearchQuery) ||
                     e.address.Contains(SearchQuery) ||
                             e.OhronnaComp.Contains(SearchQuery) ||
                              e.NumDog.ToString().Contains(SearchQuery) ||

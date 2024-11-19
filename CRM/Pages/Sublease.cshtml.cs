@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SRMAgreement.Class;
 using SRMAgreement.Data_Base;
 using SRMAgreement.SuppCode;
+using System.Linq;
 
 namespace SRMAgreement.Pages
 {
@@ -281,6 +282,32 @@ namespace SRMAgreement.Pages
             }
             return char.ToUpper(input[0]) + input.Substring(1).ToLower();
         }
+        public string ToUpperAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return char.ToUpper(input[0]) + input.Substring(1);
+        }
+
+        public string ToUpperAllLaters(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToUpper();
+        }
+
+        public string ToLowerAll(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+            return input.ToLower();
+        }
 
         public async Task<IActionResult> OnPostSearchAsync()
         {
@@ -299,7 +326,7 @@ namespace SRMAgreement.Pages
             string searchQueryLower = ToUpperFirstLetter(SearchQuery);
             D4 = await _context.D4
                 .Where(e => e.NumberGroup.ToString() == SearchQuery ||
-                      e.NameGroup.Contains(searchQueryLower) ||
+                      e.NameGroup.Contains(searchQueryLower) || e.NameGroup == ToUpperAll(SearchQuery) || e.NameGroup == ToLowerAll(SearchQuery) || e.NameGroup == ToUpperAllLaters(SearchQuery) ||
                             e.address.Contains(searchQueryLower) ||
                             e.DogovirSuborendu.Contains(SearchQuery) ||
                             e.DateTime.ToString().Contains(SearchQuery) ||
