@@ -37,7 +37,10 @@ namespace SRMAgreement.Pages
                                           .Where(p => (p.EndAktDate >= today && p.EndAktDate <= oneMonthLater))
                                           .ToListAsync();
 
-            D4.AddRange(D4_filtered.Where(a=> a.Done == null || a.Done == Convert.ToBoolean(0) || a.Done == false));
+            D4.AddRange(D4_filtered.Where(a =>
+                (a.Done == null || a.Done == Convert.ToBoolean(0) || a.Done == false) ||
+                (a.Done == true || a.Done == Convert.ToBoolean(1) && a.EndAktDate >= today && a.EndAktDate <= oneMonthLater)
+                ));
         }
 
         public async Task<IActionResult> OnPostLogoutAsync()

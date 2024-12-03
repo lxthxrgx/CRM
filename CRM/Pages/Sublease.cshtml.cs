@@ -115,7 +115,8 @@ namespace SRMAgreement.Pages
                 EndAktDate = x.EndAktDate,
                 Suma = x.Suma,
                 Suma2 = x.Suma2,
-                AktDate = x.AktDate
+                AktDate = x.AktDate,
+                Done = x.Done
             }).ToList();
 
 
