@@ -28,18 +28,18 @@ namespace SRMAgreement.Pages
         public async Task OnGet()
         {
             DateTime today = DateTime.UtcNow.Date;
+            DateTime mMonthToday = today.AddMonths(-1);
             DateTime oneMonthLater = today.AddMonths(1);
             D4.Clear();
-            ViewData["Today"] = today;
+            ViewData["Today"] = mMonthToday;
             ViewData["OneMonthLater"] = oneMonthLater;
 
             var D4_filtered = await _context.D4
-                                          .Where(p => (p.EndAktDate >= today && p.EndAktDate <= oneMonthLater))
+                                          .Where(p => (p.EndAktDate >= mMonthToday && p.EndAktDate <= oneMonthLater))
                                           .ToListAsync();
 
             D4.AddRange(D4_filtered.Where(a =>
-                (a.Done == null || a.Done == Convert.ToBoolean(0) || a.Done == false) ||
-                (a.Done == true || a.Done == Convert.ToBoolean(1) && a.EndAktDate >= today && a.EndAktDate <= oneMonthLater)
+                (a.Done == null || a.Done == Convert.ToBoolean(0) || a.Done == false)
                 ));
         }
 
